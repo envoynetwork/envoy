@@ -36,8 +36,8 @@ contract EnvoyToken is ERC20 {
   // Amount of tokens assigned to buyers
   uint256 public _totalBuyerTokens;
 
-  // Amount of tokens a wallet has withdrawn already
-  mapping(address => uint256) public _walletTokensWithdrawn;
+  // Amount of tokens a wallet has withdrawn already, per type
+  mapping(string => mapping(address => uint256)) public _walletTokensWithdrawn;
 
 
   //
@@ -98,14 +98,14 @@ contract EnvoyToken is ERC20 {
   function publicSaleWithdraw(uint256 tokenAmount) public {
     require(_msgSender() == _publicSaleWallet, "Unauthorized public sale wallet");
 
-    uint256 hasWithdrawn = _walletTokensWithdrawn[_msgSender()];
+    uint256 hasWithdrawn = _walletTokensWithdrawn["publicsale"][_msgSender()];
 
     // Total = 1M instant
     uint256 canWithdraw = 1000000000000000000000000 - hasWithdrawn;
 
     require(tokenAmount <= canWithdraw, "Withdraw amount too high");
 
-    _walletTokensWithdrawn[_msgSender()] += tokenAmount;
+    _walletTokensWithdrawn["publicsale"][_msgSender()] += tokenAmount;
 
     _transfer(address(this), _msgSender(), tokenAmount);    
   }
@@ -116,11 +116,11 @@ contract EnvoyToken is ERC20 {
     // Cliff = 6 months = 262800 minutes
     // Vesting = 18 months 788401 minutes
     // Total = 20M
-    uint256 canWithdraw = walletCanWithdraw(_msgSender(), 0, 262800, 788401, 20000000000000000000000000);
+    uint256 canWithdraw = walletCanWithdraw(_msgSender(), "team", 0, 262800, 788401, 20000000000000000000000000);
     
     require(tokenAmount <= canWithdraw, "Withdraw amount too high");
 
-    _walletTokensWithdrawn[_msgSender()] += tokenAmount;
+    _walletTokensWithdrawn["team"][_msgSender()] += tokenAmount;
 
     _transfer(address(this), _msgSender(), tokenAmount);  
   }
@@ -131,11 +131,11 @@ contract EnvoyToken is ERC20 {
     // Cliff = 3 months = 131400 minutes
     // Vesting = 24 months = 1051202 minutes
     // Total = 25M
-    uint256 canWithdraw = walletCanWithdraw(_msgSender(), 0, 131400, 1051202, 25000000000000000000000000);
+    uint256 canWithdraw = walletCanWithdraw(_msgSender(), "ecosystem", 0, 131400, 1051202, 25000000000000000000000000);
     
     require(tokenAmount <= canWithdraw, "Withdraw amount too high");
 
-    _walletTokensWithdrawn[_msgSender()] += tokenAmount;
+    _walletTokensWithdrawn["ecosystem"][_msgSender()] += tokenAmount;
 
     _transfer(address(this), _msgSender(), tokenAmount);  
   }
@@ -146,11 +146,11 @@ contract EnvoyToken is ERC20 {
     // Cliff = 6 months = 262800 minutes
     // Vesting = 24 months = 1051202 minutes
     // Total = 20M
-    uint256 canWithdraw = walletCanWithdraw(_msgSender(), 0, 262800, 1051202, 20000000000000000000000000);
+    uint256 canWithdraw = walletCanWithdraw(_msgSender(), "reserve", 0, 262800, 1051202, 20000000000000000000000000);
     
     require(tokenAmount <= canWithdraw, "Withdraw amount too high");
 
-    _walletTokensWithdrawn[_msgSender()] += tokenAmount;
+    _walletTokensWithdrawn["reserve"][_msgSender()] += tokenAmount;
 
     _transfer(address(this), _msgSender(), tokenAmount);  
   }
@@ -158,14 +158,14 @@ contract EnvoyToken is ERC20 {
   function dexWithdraw(uint256 tokenAmount) public {
     require(_msgSender() == _dexWallet, "Unauthorized dex wallet");
 
-    uint256 hasWithdrawn = _walletTokensWithdrawn[_msgSender()];
+    uint256 hasWithdrawn = _walletTokensWithdrawn["dex"][_msgSender()];
 
-    // Total = 7M instant
+    // Total = 2M instant
     uint256 canWithdraw = 2000000000000000000000000 - hasWithdrawn;
 
     require(tokenAmount <= canWithdraw, "Withdraw amount too high");
 
-    _walletTokensWithdrawn[_msgSender()] += tokenAmount;
+    _walletTokensWithdrawn["dex"][_msgSender()] += tokenAmount;
 
     _transfer(address(this), _msgSender(), tokenAmount);    
   }
@@ -176,11 +176,11 @@ contract EnvoyToken is ERC20 {
     // Cliff = 0
     // Vesting = 6 months = 262800 minutes
     // Total = 7M
-    uint256 canWithdraw = walletCanWithdraw(_msgSender(), 0, 0, 262800, 7000000000000000000000000);
+    uint256 canWithdraw = walletCanWithdraw(_msgSender(), "liq", 0, 0, 262800, 7000000000000000000000000);
     
     require(tokenAmount <= canWithdraw, "Withdraw amount too high");
 
-    _walletTokensWithdrawn[_msgSender()] += tokenAmount;
+    _walletTokensWithdrawn["liq"][_msgSender()] += tokenAmount;
 
     _transfer(address(this), _msgSender(), tokenAmount);  
   }
@@ -191,11 +191,11 @@ contract EnvoyToken is ERC20 {
     // TGE: 10%
     // Cliff = 2 months = 87600 minutes
     // Vesting = 6 months = 262800 minutes
-    uint256 canWithdraw = walletCanWithdraw(_msgSender(), 10, 87600, 262800, _buyerTokens[_msgSender()]);
+    uint256 canWithdraw = walletCanWithdraw(_msgSender(), "privatesale", 10, 87600, 262800, _buyerTokens[_msgSender()]);
     
     require(tokenAmount <= canWithdraw, "Withdraw amount too high");
 
-    _walletTokensWithdrawn[_msgSender()] += tokenAmount;
+    _walletTokensWithdrawn["privatesale"][_msgSender()] += tokenAmount;
 
     _transfer(address(this), _msgSender(), tokenAmount);    
   }
@@ -204,12 +204,12 @@ contract EnvoyToken is ERC20 {
   // ******************* UNLOCK CALCULATION *******************
   //
 
-  function walletCanWithdraw(address wallet, uint256 initialPercentage, uint256 cliffMinutes, uint256 vestingMinutes, uint256 totalTokens) public view returns(uint256) {
+  function walletCanWithdraw(address wallet, string memory walletType, uint256 initialPercentage, uint256 cliffMinutes, uint256 vestingMinutes, uint256 totalTokens) public view returns(uint256) {
     
     uint256 minutesDiff = (block.timestamp - _deployTime).div(60);
 
     // Tokens already withdrawn
-    uint256 withdrawnTokens = _walletTokensWithdrawn[wallet];
+    uint256 withdrawnTokens = _walletTokensWithdrawn[walletType][wallet];
 
     // Initial tokens
     uint256 initialTokens = 0;

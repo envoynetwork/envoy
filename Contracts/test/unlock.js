@@ -11,19 +11,19 @@ contract("Unlock without initial or cliff", function(accounts) {
     const userAddress = accounts[1];
     const EnvoyTokenInstance = await EnvoyToken.deployed();
 
-    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, 0, 0, 100, 1000);
+    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, "test", 0, 0, 100, 1000);
     assert.equal(result, 0, "Withdraw amount should be correct");
 
     await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(1));
-    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, 0, 0, 100, 1000);
+    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, "test", 0, 0, 100, 1000);
     assert.equal(result, 10, "Withdraw amount should be correct");
 
     await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(100));
-    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, 0, 0, 100, 1000);
+    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, "test", 0, 0, 100, 1000);
     assert.equal(result, 1000, "Withdraw amount should be correct");
 
     await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(1));
-    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, 0, 0, 100, 1000);
+    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, "test", 0, 0, 100, 1000);
     assert.equal(result, 1000, "Withdraw amount should be correct");
 
   });
@@ -38,23 +38,23 @@ contract("Unlock without initial", function(accounts) {
     const userAddress = accounts[1];
     const EnvoyTokenInstance = await EnvoyToken.deployed();
 
-    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, 0, 10, 100, 1000);
+    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, "test", 0, 10, 100, 1000);
     assert.equal(result, 0, "Withdraw amount should be correct");
 
     await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(10));
-    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, 0, 10, 100, 1000);
+    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, "test", 0, 10, 100, 1000);
     assert.equal(result, 0, "Withdraw amount should be correct");
 
     await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(1));
-    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, 0, 10, 100, 1000);
+    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, "test", 0, 10, 100, 1000);
     assert.equal(result, 10, "Withdraw amount should be correct");
 
     await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(100));
-    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, 0, 10, 100, 1000);
+    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, "test", 0, 10, 100, 1000);
     assert.equal(result, 1000, "Withdraw amount should be correct");
 
     await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(1));
-    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, 0, 10, 100, 1000);
+    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, "test", 0, 10, 100, 1000);
     assert.equal(result, 1000, "Withdraw amount should be correct");
 
   });
@@ -69,23 +69,23 @@ contract("Unlock", function(accounts) {
     const userAddress = accounts[1];
     const EnvoyTokenInstance = await EnvoyToken.deployed();
 
-    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, 5, 10, 100, 1000000);
+    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, "test", 5, 10, 100, 1000000);
     assert.equal(result, 50000, "Withdraw amount should be correct");
 
     await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(10));
-    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, 5, 10, 100, 1000000);
+    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, "test", 5, 10, 100, 1000000);
     assert.equal(result, 50000, "Withdraw amount should be correct");
 
     await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(1));
-    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, 5, 10, 100, 1000000);
+    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, "test", 5, 10, 100, 1000000);
     assert.equal(result, 59500, "Withdraw amount should be correct");
 
     await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(100));
-    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, 5, 10, 100, 1000000);
+    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, "test", 5, 10, 100, 1000000);
     assert.equal(result, 1000000, "Withdraw amount should be correct");
 
     await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(1));
-    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, 5, 10, 100, 1000000);
+    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, "test", 5, 10, 100, 1000000);
     assert.equal(result, 1000000, "Withdraw amount should be correct");
 
   });
@@ -100,19 +100,19 @@ contract("Unlock no cliff", function(accounts) {
     const userAddress = accounts[1];
     const EnvoyTokenInstance = await EnvoyToken.deployed();
 
-    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, 5, 0, 100, 1000000);
+    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, "test", 5, 0, 100, 1000000);
     assert.equal(result, 50000, "Withdraw amount should be correct");
 
     await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(1));
-    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, 5, 0, 100, 1000000);
+    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, "test", 5, 0, 100, 1000000);
     assert.equal(result, 59500, "Withdraw amount should be correct");
 
     await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(100));
-    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, 5, 0, 100, 1000000);
+    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, "test", 5, 0, 100, 1000000);
     assert.equal(result, 1000000, "Withdraw amount should be correct");
 
     await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(1));
-    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, 5, 0, 100, 1000000);
+    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, "test", 5, 0, 100, 1000000);
     assert.equal(result, 1000000, "Withdraw amount should be correct");
 
   });
@@ -127,19 +127,19 @@ contract("Unlock no vesting", function(accounts) {
     const userAddress = accounts[1];
     const EnvoyTokenInstance = await EnvoyToken.deployed();
 
-    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, 5, 10, 1, 1000000);
+    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, "test", 5, 10, 1, 1000000);
     assert.equal(result, 50000, "Withdraw amount should be correct");
 
     await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(1));
-    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, 5, 10, 1, 1000000);
+    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, "test", 5, 10, 1, 1000000);
     assert.equal(result, 50000, "Withdraw amount should be correct");
 
     await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(10));
-    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, 5, 10, 1, 1000000);
+    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, "test", 5, 10, 1, 1000000);
     assert.equal(result, 1000000, "Withdraw amount should be correct");
 
     await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(1));
-    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, 5, 10, 1, 1000000);
+    var result = await EnvoyTokenInstance.walletCanWithdraw(userAddress, "test", 5, 10, 1, 1000000);
     assert.equal(result, 1000000, "Withdraw amount should be correct");
 
   });
@@ -172,36 +172,36 @@ contract("Unlock with withdrawals - 1", function(accounts) {
     const publicSaleAddress = accounts[1];
     const EnvoyTokenInstance = await EnvoyToken.deployed();
 
-    var result = await EnvoyTokenInstance.walletCanWithdraw(publicSaleAddress, 0, 0, 100, 1000);
+    var result = await EnvoyTokenInstance.walletCanWithdraw(publicSaleAddress, "publicsale", 0, 0, 100, 1000);
     assert.equal(result, 0, "Withdraw amount should be correct");
 
     await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(1));
-    var result = await EnvoyTokenInstance.walletCanWithdraw(publicSaleAddress, 0, 0, 100, 1000);
+    var result = await EnvoyTokenInstance.walletCanWithdraw(publicSaleAddress, "publicsale", 0, 0, 100, 1000);
     assert.equal(result, 10, "Withdraw amount should be correct");
 
     // Withdraw
     var result = await EnvoyTokenInstance.publicSaleWithdraw(10, {from: publicSaleAddress});
     assert.equal(result.receipt.status, true, "Transaction should succeed");
 
-    var result = await EnvoyTokenInstance.walletCanWithdraw(publicSaleAddress, 0, 0, 100, 1000);
+    var result = await EnvoyTokenInstance.walletCanWithdraw(publicSaleAddress, "publicsale", 0, 0, 100, 1000);
     assert.equal(result, 0, "Withdraw amount should be correct");
 
     await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(100));
-    var result = await EnvoyTokenInstance.walletCanWithdraw(publicSaleAddress, 0, 0, 100, 1000);
+    var result = await EnvoyTokenInstance.walletCanWithdraw(publicSaleAddress, "publicsale", 0, 0, 100, 1000);
     assert.equal(result, 990, "Withdraw amount should be correct");
 
     // Withdraw
     var result = await EnvoyTokenInstance.publicSaleWithdraw(900, {from: publicSaleAddress});
     assert.equal(result.receipt.status, true, "Transaction should succeed");
 
-    var result = await EnvoyTokenInstance.walletCanWithdraw(publicSaleAddress, 0, 0, 100, 1000);
+    var result = await EnvoyTokenInstance.walletCanWithdraw(publicSaleAddress, "publicsale", 0, 0, 100, 1000);
     assert.equal(result, 90, "Withdraw amount should be correct");
 
     // Withdraw
     var result = await EnvoyTokenInstance.publicSaleWithdraw(90, {from: publicSaleAddress});
     assert.equal(result.receipt.status, true, "Transaction should succeed");
 
-    var result = await EnvoyTokenInstance.walletCanWithdraw(publicSaleAddress, 0, 0, 100, 1000);
+    var result = await EnvoyTokenInstance.walletCanWithdraw(publicSaleAddress, "publicsale", 0, 0, 100, 1000);
     assert.equal(result, 0, "Withdraw amount should be correct");
 
   });
@@ -234,33 +234,33 @@ contract("Unlock with withdrawals - 2", function(accounts) {
     const publicSaleAddress = accounts[1];
     const EnvoyTokenInstance = await EnvoyToken.deployed();
 
-    var result = await EnvoyTokenInstance.walletCanWithdraw(publicSaleAddress, 5, 10, 100, 1000000);
+    var result = await EnvoyTokenInstance.walletCanWithdraw(publicSaleAddress, "publicsale", 5, 10, 100, 1000000);
     assert.equal(result, 50000, "Withdraw amount should be correct");
 
     // Withdraw
     var result = await EnvoyTokenInstance.publicSaleWithdraw(50000, {from: publicSaleAddress});
     assert.equal(result.receipt.status, true, "Transaction should succeed");
 
-    var result = await EnvoyTokenInstance.walletCanWithdraw(publicSaleAddress, 5, 10, 100, 1000000);
+    var result = await EnvoyTokenInstance.walletCanWithdraw(publicSaleAddress, "publicsale", 5, 10, 100, 1000000);
     assert.equal(result, 0, "Withdraw amount should be correct");
 
     await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(10));
-    var result = await EnvoyTokenInstance.walletCanWithdraw(publicSaleAddress, 5, 10, 100, 1000000);
+    var result = await EnvoyTokenInstance.walletCanWithdraw(publicSaleAddress, "publicsale", 5, 10, 100, 1000000);
     assert.equal(result, 0, "Withdraw amount should be correct");
 
     await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(10));
-    var result = await EnvoyTokenInstance.walletCanWithdraw(publicSaleAddress, 5, 10, 100, 1000000);
+    var result = await EnvoyTokenInstance.walletCanWithdraw(publicSaleAddress, "publicsale", 5, 10, 100, 1000000);
     assert.equal(result, 95000, "Withdraw amount should be correct");
 
     // Withdraw
     var result = await EnvoyTokenInstance.publicSaleWithdraw(95000, {from: publicSaleAddress});
     assert.equal(result.receipt.status, true, "Transaction should succeed");
 
-    var result = await EnvoyTokenInstance.walletCanWithdraw(publicSaleAddress, 5, 10, 100, 1000000);
+    var result = await EnvoyTokenInstance.walletCanWithdraw(publicSaleAddress, "publicsale", 5, 10, 100, 1000000);
     assert.equal(result, 0, "Withdraw amount should be correct");
 
     await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(100));
-    var result = await EnvoyTokenInstance.walletCanWithdraw(publicSaleAddress, 5, 10, 100, 1000000);
+    var result = await EnvoyTokenInstance.walletCanWithdraw(publicSaleAddress, "publicsale", 5, 10, 100, 1000000);
     assert.equal(result, 855000, "Withdraw amount should be correct");
 
   });

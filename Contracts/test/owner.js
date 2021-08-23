@@ -69,3 +69,67 @@ contract("Owner can set up wallets", function(accounts) {
   });
 
 });
+
+
+contract("Withdraw all tokens", function(accounts) {
+
+  before("Set wallets", async function () {
+
+    // Const
+    const ownerAddress = accounts[0];
+    const userAddress = accounts[1];
+ 
+    const EnvoyTokenInstance = await EnvoyToken.deployed();
+
+    // Update wallets
+    var result = await EnvoyTokenInstance.updateWallets(userAddress, userAddress, userAddress, userAddress, userAddress, userAddress);
+    assert.equal(result.receipt.status, true, "Transaction should succeed");
+ });
+
+  it("Unlock and withdraw all", async () => {
+
+    // Const
+    const userAddress = accounts[1];
+    const EnvoyTokenInstance = await EnvoyToken.deployed();
+
+    // All 25M tokens for buyer
+    var result = await EnvoyTokenInstance.setBuyerTokens(userAddress, "25000000" + "000000000000000000");
+    assert.equal(result.receipt.status, true, "Transaction should succeed");
+
+    // All tokens are unlocked
+    await truffleHelpers.time.increase(truffleHelpers.time.duration.weeks(150));
+
+    // Withdraw 1M for public sale
+    var result = await EnvoyTokenInstance.publicSaleWithdraw("1000000" + "000000000000000000", {from: userAddress});
+    assert.equal(result.receipt.status, true, "Transaction should succeed");
+
+    // Withdraw 20M for team
+    var result = await EnvoyTokenInstance.teamWithdraw("20000000" + "000000000000000000", {from: userAddress});
+    assert.equal(result.receipt.status, true, "Transaction should succeed");
+
+    // Withdraw 25M for ecosystem
+    var result = await EnvoyTokenInstance.ecosystemWithdraw("25000000" + "000000000000000000", {from: userAddress});
+    assert.equal(result.receipt.status, true, "Transaction should succeed");
+
+    // Withdraw 20M for reserve
+    var result = await EnvoyTokenInstance.reservesWithdraw("20000000" + "000000000000000000", {from: userAddress});
+    assert.equal(result.receipt.status, true, "Transaction should succeed");
+
+    // Withdraw 2M for dex
+    var result = await EnvoyTokenInstance.dexWithdraw("2000000" + "000000000000000000", {from: userAddress});
+    assert.equal(result.receipt.status, true, "Transaction should succeed");
+
+    // Withdraw 7M for liquidity incentives
+    var result = await EnvoyTokenInstance.liqWithdraw("7000000" + "000000000000000000", {from: userAddress});
+    assert.equal(result.receipt.status, true, "Transaction should succeed");
+
+    // Withdraw 25M for private sale buyer
+    var result = await EnvoyTokenInstance.buyerWithdraw("25000000" + "000000000000000000", {from: userAddress});
+    assert.equal(result.receipt.status, true, "Transaction should succeed");
+
+    // Balance
+    var result = await EnvoyTokenInstance.balanceOf(userAddress);
+    assert.equal(result, "100000000" + "000000000000000000", "Should have 100M tokens");
+  });
+
+});
