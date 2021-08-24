@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Envoy Token - Admin Page</title>
+
+    <!-- Web3 -->
+    <script src="node_modules/web3/dist/web3.min.js"></script>
+
+  </head>
+
+  <body>
+    <h1>Envoy Token - Admin page</h1><br />
+
+    <!-- INFO -->
+    <h2>Contract Info</h2>
+    <div>
+
+      <p>Total supply (with 18 decimals): <strong id="i_token_supply">...</strong></p>
+      <p>Total tokens assigned in private sale: <strong id="i_totalBuyerTokens">...</strong></p>
+      <br/>
+      <p>Owner wallet: <strong id="i_ownerWallet">...</strong></p>
+      <p>Public sale wallet: <strong id="i_publicSaleWallet">...</strong></p>
+      <p>Team wallet: <strong id="i_teamWallet">...</strong></p>
+      <p>Ecosystem wallet: <strong id="i_ecosystemWallet">...</strong></p>
+      <p>Reserve wallet: <strong id="i_reserveWallet">...</strong></p>
+      <p>DEX wallet: <strong id="i_dexWallet">...</strong></p>
+      <p>Liq incentives wallet: <strong id="i_liqWallet">...</strong></p>
+
+    </div>
+
+    <!-- WALLET -->
+    <h2>Connect wallet</h2>
+    <div id="d_connectWallet" style="display: none;">
+      <p>Connected wallet: <strong id="i_wallet_address">...</strong></p>
+      <p>On network: <strong id="i_network_name">...</strong></p>
+      <p>Wallet balance (with 18 decimals): <strong id="i_token_balance">...</strong></p>
+      <button id="i_add_metamask">Add $ENV to MetaMask</button>
+    </div>
+    <button id="b_connectWallet">Connect wallet</button>
+    <br />
+
+    <!-- BUYERS -->
+    <div id="d_buyers" style="display: none;">
+
+      <!-- OWNER -->
+      <h2>Owner actions</h2>
+
+      <h3>Setup new owner</h3>
+      New owner address: <input id="o_owner" type="text"><br/>
+      <button id="o_set">Set</button>
+
+      <h3>Setup wallets</h3>
+      Public sale: <input id="w_publicSale" type="text"><br/>
+      Team: <input id="w_team" type="text"><br/>
+      Ecosystem: <input id="w_ecosystem" type="text"><br/>
+      Reserves: <input id="w_reserves" type="text"><br/>
+      DEX: <input id="w_dex" type="text"><br/>
+      Liquidity incentives: <input id="w_liq" type="text"><br/>
+      <button id="w_set">Set</button>
+
+      <h3>Set buyer amount</h3>
+      Buyer address: <input id="b_address" type="text"><br/>
+      Buyer amount (with 18 decimals): <input id="b_amount" type="number"><br/>
+      <button id="b_buyer">Set</button>
+
+      <h3>Get buyer amount</h3>
+      Buyer address: <input id="bi_address" type="text"><br/>
+      <button id="bi_buyer">Get</button>
+      <p>Buyer amount (with 18 decimals): <strong id="bi_info">...</strong></p>
+      <p>Buyer withdrawn already (with 18 decimals): <strong id="bi_withdraw">...</strong></p>
+
+      <!-- WITHDRAW -->
+      <h2>Withdraw actions</h2>
+
+      <h3>Public sale</h3>
+      Amount (with 18 decimals): <input id="w1_amount" type="number"><br/>
+      <button id="w1_withdraw">Withdraw</button>
+
+      <h3>Team</h3>
+      Amount (with 18 decimals): <input id="w2_amount" type="number"><br/>
+      <button id="w2_withdraw">Withdraw</button>
+
+      <h3>Ecosystem</h3>
+      Amount (with 18 decimals): <input id="w3_amount" type="number"><br/>
+      <button id="w3_withdraw">Withdraw</button>
+
+      <h3>Reserve</h3>
+      Amount (with 18 decimals): <input id="w4_amount" type="number"><br/>
+      <button id="w4_withdraw">Withdraw</button>
+
+      <h3>DEX</h3>
+      Amount (with 18 decimals): <input id="w5_amount" type="number"><br/>
+      <button id="w5_withdraw">Withdraw</button>
+
+      <h3>Liquidity incentives</h3>
+      Amount (with 18 decimals): <input id="w6_amount" type="number"><br/>
+      <button id="w6_withdraw">Withdraw</button>
+
+      <h3>Private sale buyer</h3>
+      Amount (with 18 decimals): <input id="w7_amount" type="number"><br/>
+      <button id="w7_withdraw">Withdraw</button>
+
+    </div>
+
+    <!-- JS LIBS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://requirejs.org/docs/release/2.3.5/minified/require.js"></script>
+
+    <!-- START APP -->
+    <script type="module">
+
+      import { loadPage } from './js/index-logic.js';
+
+      // On page load, setup wallet
+      window.addEventListener('load', async () => {
+        loadPage();
+      });
+
+    </script>
+
+  </body>
+</html>
