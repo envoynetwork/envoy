@@ -1,3 +1,7 @@
+# $ENVOY Token
+
+### Utility token to use on envoy.art and related platforms
+
 ------------------------
 //    SMART CONTRACT   
 ------------------------
@@ -6,6 +10,7 @@ Using "Openzeppelin" to make sure the ERC20 standard is respected.
 https://openzeppelin.com/
 
 Access rights:
+
 - Contract owner will be able to update contract owner
 - Contract owner will be able to set other addresses
 - Contract owner will be able to update private sale buyers
@@ -14,7 +19,8 @@ Access rights:
 //    LOCAL   
 ------------------------
 
-Truffle & Ganache
+Truffle & Ganache:
+
 - https://www.trufflesuite.com/
 - https://www.trufflesuite.com/ganache
 - Ganache to set up local Ethereum blockchain
@@ -27,10 +33,12 @@ Install chai:
 - npm install --save-dev chai
 
 Excluded files:
+
 - .secret = private key for deployer wallet
 - .infuraKey = Infura API key
 
 Useful commands:
+
 - $ truffle test
 - $ truffle test ./test/mint.js 
 - $ truffle migrate --network development
@@ -50,13 +58,3 @@ Useful commands:
 ------------------------
 
 - Use Infura (infura.io) to connect to an Ethereum node
-
-------------------------
-//    WEBSITE   
-------------------------
-
-- Using "web3" library.
-- Network and contract address can be set up in "settings.js"
-
-Start local webserver:
-- $ php -S 127.0.0.1:8000
