@@ -16,11 +16,38 @@ contract("Owner can set up wallets", function(accounts) {
     const dexAddress = accounts[5];
     const liquidityAddress = accounts[6];
 
+    const zeroAddress = "0x0000000000000000000000000000000000000000";
+
     const EnvoyTokenInstance = await EnvoyToken.deployed();
 
     // Update wallets
     var result = await EnvoyTokenInstance.updateWallets(publicSaleAddress, teamAddress, ecosystemAddress, reservesAddress, dexAddress, liquidityAddress);
     assert.equal(result.receipt.status, true, "Transaction should succeed");
+
+    await truffleAssert.reverts(
+      EnvoyTokenInstance.updateWallets(zeroAddress, teamAddress, ecosystemAddress, reservesAddress, dexAddress, liquidityAddress),
+      "Should not set zero address"
+    );
+    await truffleAssert.reverts(
+      EnvoyTokenInstance.updateWallets(publicSaleAddress, zeroAddress, ecosystemAddress, reservesAddress, dexAddress, liquidityAddress),
+      "Should not set zero address"
+    );
+    await truffleAssert.reverts(
+      EnvoyTokenInstance.updateWallets(publicSaleAddress, teamAddress, zeroAddress, reservesAddress, dexAddress, liquidityAddress),
+      "Should not set zero address"
+    );
+    await truffleAssert.reverts(
+      EnvoyTokenInstance.updateWallets(publicSaleAddress, teamAddress, ecosystemAddress, zeroAddress, dexAddress, liquidityAddress),
+      "Should not set zero address"
+    );
+    await truffleAssert.reverts(
+      EnvoyTokenInstance.updateWallets(publicSaleAddress, teamAddress, ecosystemAddress, reservesAddress, zeroAddress, liquidityAddress),
+      "Should not set zero address"
+    );
+    await truffleAssert.reverts(
+      EnvoyTokenInstance.updateWallets(publicSaleAddress, teamAddress, ecosystemAddress, reservesAddress, dexAddress, zeroAddress),
+      "Should not set zero address"
+    );
 
     // Only owner can update wallets
     await truffleAssert.reverts(

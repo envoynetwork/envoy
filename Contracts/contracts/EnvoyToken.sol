@@ -58,15 +58,22 @@ contract EnvoyToken is ERC20 {
   //
 
   // Owner can update owner
-  function updateOwner(address owner) public {
+  function updateOwner(address owner) external {
     require(_msgSender() == _ownerWallet, "Only owner can update wallets");
 
     _ownerWallet = owner; 
   }
 
   // Update wallets
-  function updateWallets(address publicSale, address team, address ecosystem, address reserves, address dex, address liq) public {
+  function updateWallets(address publicSale, address team, address ecosystem, address reserves, address dex, address liq) external {
     require(_msgSender() == _ownerWallet, "Only owner can update wallets");
+
+    require(publicSale != address(0), "Should not set zero address");
+    require(team != address(0), "Should not set zero address");
+    require(ecosystem != address(0), "Should not set zero address");
+    require(reserves != address(0), "Should not set zero address");
+    require(dex != address(0), "Should not set zero address");
+    require(liq != address(0), "Should not set zero address");
 
     _publicSaleWallet = publicSale; 
     _teamWallet = team;
@@ -77,7 +84,7 @@ contract EnvoyToken is ERC20 {
   }
 
   // Update buyer tokens
-  function setBuyerTokens(address buyer, uint256 tokenAmount) public {
+  function setBuyerTokens(address buyer, uint256 tokenAmount) external {
     require(_msgSender() == _ownerWallet, "Only owner can set buyer tokens");
 
     // Update total
@@ -95,7 +102,7 @@ contract EnvoyToken is ERC20 {
   // ******************* OWNER *******************
   //
 
-  function publicSaleWithdraw(uint256 tokenAmount) public {
+  function publicSaleWithdraw(uint256 tokenAmount) external {
     require(_msgSender() == _publicSaleWallet, "Unauthorized public sale wallet");
 
     uint256 hasWithdrawn = _walletTokensWithdrawn["publicsale"][_msgSender()];
@@ -110,7 +117,7 @@ contract EnvoyToken is ERC20 {
     _transfer(address(this), _msgSender(), tokenAmount);    
   }
 
-  function teamWithdraw(uint256 tokenAmount) public {
+  function teamWithdraw(uint256 tokenAmount) external {
     require(_msgSender() == _teamWallet, "Unauthorized team wallet");
 
     // Cliff = 6 months = 262800 minutes
@@ -125,7 +132,7 @@ contract EnvoyToken is ERC20 {
     _transfer(address(this), _msgSender(), tokenAmount);  
   }
 
-  function ecosystemWithdraw(uint256 tokenAmount) public {
+  function ecosystemWithdraw(uint256 tokenAmount) external {
     require(_msgSender() == _ecosystemWallet, "Unauthorized ecosystem wallet");
 
     // Cliff = 3 months = 131400 minutes
@@ -140,7 +147,7 @@ contract EnvoyToken is ERC20 {
     _transfer(address(this), _msgSender(), tokenAmount);  
   }
 
-  function reservesWithdraw(uint256 tokenAmount) public {
+  function reservesWithdraw(uint256 tokenAmount) external {
     require(_msgSender() == _reservesWallet, "Unauthorized reserves wallet");
 
     // Cliff = 6 months = 262800 minutes
@@ -155,7 +162,7 @@ contract EnvoyToken is ERC20 {
     _transfer(address(this), _msgSender(), tokenAmount);  
   }
 
-  function dexWithdraw(uint256 tokenAmount) public {
+  function dexWithdraw(uint256 tokenAmount) external {
     require(_msgSender() == _dexWallet, "Unauthorized dex wallet");
 
     uint256 hasWithdrawn = _walletTokensWithdrawn["dex"][_msgSender()];
@@ -170,7 +177,7 @@ contract EnvoyToken is ERC20 {
     _transfer(address(this), _msgSender(), tokenAmount);    
   }
 
-  function liqWithdraw(uint256 tokenAmount) public {
+  function liqWithdraw(uint256 tokenAmount) external {
     require(_msgSender() == _liqWallet, "Unauthorized liquidity incentives wallet");
 
     // Cliff = 0
@@ -186,7 +193,7 @@ contract EnvoyToken is ERC20 {
   }
 
 
-  function buyerWithdraw(uint256 tokenAmount) public {
+  function buyerWithdraw(uint256 tokenAmount) external {
     
     // TGE: 10%
     // Cliff = 2 months = 87600 minutes
