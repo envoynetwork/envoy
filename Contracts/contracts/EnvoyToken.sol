@@ -75,6 +75,13 @@ contract EnvoyToken is ERC20 {
     require(dex != address(0), "Should not set zero address");
     require(liq != address(0), "Should not set zero address");
 
+    _walletTokensWithdrawn["publicsale"][publicSale] = _walletTokensWithdrawn["publicsale"][_publicSaleWallet];
+    _walletTokensWithdrawn["team"][team] = _walletTokensWithdrawn["team"][_teamWallet];
+    _walletTokensWithdrawn["ecosystem"][ecosystem] = _walletTokensWithdrawn["ecosystem"][_ecosystemWallet];
+    _walletTokensWithdrawn["reserve"][reserves] = _walletTokensWithdrawn["reserve"][_reservesWallet];
+    _walletTokensWithdrawn["dex"][dex] = _walletTokensWithdrawn["dex"][_dexWallet];
+    _walletTokensWithdrawn["liq"][liq] = _walletTokensWithdrawn["liq"][_liqWallet];
+
     _publicSaleWallet = publicSale; 
     _teamWallet = team;
     _ecosystemWallet = ecosystem;

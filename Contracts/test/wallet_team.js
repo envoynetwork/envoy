@@ -193,3 +193,69 @@ contract("Only team address can withdraw for team wallet", function(accounts) {
   });
 
 });
+
+contract("Team can withdraw 20M over time - 1", function(accounts) {
+
+  before("Set wallets", async function () {
+
+     // Const
+     const ownerAddress = accounts[0];
+     const publicSaleAddress = accounts[1];
+     const teamAddress = accounts[2];
+     const ecosystemAddress = accounts[3];
+     const reservesAddress = accounts[4];
+     const dexAddress = accounts[5];
+     const liquidityAddress = accounts[6];
+  
+     const EnvoyTokenInstance = await EnvoyToken.deployed();
+
+     // Update wallets
+     var result = await EnvoyTokenInstance.updateWallets(publicSaleAddress, teamAddress, ecosystemAddress, reservesAddress, dexAddress, liquidityAddress);
+     assert.equal(result.receipt.status, true, "Transaction should succeed");
+ });
+  
+ it("If team address changes, the max remains 20M", async () => {
+
+    // Const
+    const publicSaleAddress = accounts[1];
+    const teamAddress = accounts[2];
+    const ecosystemAddress = accounts[3];
+    const reservesAddress = accounts[4];
+    const dexAddress = accounts[5];
+    const liquidityAddress = accounts[6];
+
+    const newTeamAddress = accounts[7];
+
+    const EnvoyTokenInstance = await EnvoyToken.deployed();
+
+    // Advance cliff and vesting
+    await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(262800));
+    await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(788401));
+    await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(10));
+
+    // Withdraw
+    var result = await EnvoyTokenInstance.teamWithdraw("20000000" + "000000000000000000", {from: teamAddress});
+    assert.equal(result.receipt.status, true, "Transaction should succeed");
+
+    // Balance
+    var result = await EnvoyTokenInstance.balanceOf(teamAddress);
+    assert.equal(result, "20000000" + "000000000000000000", "Should have 20M tokens");
+
+    // Can not withdraw more
+    await truffleAssert.reverts(
+      EnvoyTokenInstance.teamWithdraw("1", {from: teamAddress}),
+      "Withdraw amount too high"
+    );
+
+    // Update wallets
+    var result = await EnvoyTokenInstance.updateWallets(publicSaleAddress, newTeamAddress, ecosystemAddress, reservesAddress, dexAddress, liquidityAddress);
+    assert.equal(result.receipt.status, true, "Transaction should succeed");
+    
+    // Can not withdraw more with new team address
+    await truffleAssert.reverts(
+      EnvoyTokenInstance.teamWithdraw("1", {from: newTeamAddress}),
+      "Withdraw amount too high"
+    );
+  });
+
+});
