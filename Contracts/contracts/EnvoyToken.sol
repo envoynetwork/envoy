@@ -23,7 +23,7 @@ contract EnvoyToken is ERC20 {
   address public _teamWallet;
   // Ecosystem - 25M
   address public _ecosystemWallet;
-  // Advisors - 20M
+  // Reserves - 20M
   address public _reservesWallet;
   // DEX - 2M
   address public _dexWallet;
@@ -124,6 +124,21 @@ contract EnvoyToken is ERC20 {
     _transfer(address(this), _msgSender(), tokenAmount);    
   }
 
+  function liqWithdraw(uint256 tokenAmount) external {
+    require(_msgSender() == _liqWallet, "Unauthorized liquidity incentives wallet");
+
+    uint256 hasWithdrawn = _walletTokensWithdrawn["liq"][_msgSender()];
+
+    // Total = 7M instant
+    uint256 canWithdraw = 7000000000000000000000000 - hasWithdrawn;
+
+    require(tokenAmount <= canWithdraw, "Withdraw amount too high");
+
+    _walletTokensWithdrawn["liq"][_msgSender()] += tokenAmount;
+
+    _transfer(address(this), _msgSender(), tokenAmount);  
+  }
+
   function teamWithdraw(uint256 tokenAmount) external {
     require(_msgSender() == _teamWallet, "Unauthorized team wallet");
 
@@ -183,22 +198,6 @@ contract EnvoyToken is ERC20 {
 
     _transfer(address(this), _msgSender(), tokenAmount);    
   }
-
-  function liqWithdraw(uint256 tokenAmount) external {
-    require(_msgSender() == _liqWallet, "Unauthorized liquidity incentives wallet");
-
-    // Cliff = 0
-    // Vesting = 6 months = 262800 minutes
-    // Total = 7M
-    uint256 canWithdraw = walletCanWithdraw(_msgSender(), "liq", 0, 0, 262800, 7000000000000000000000000);
-    
-    require(tokenAmount <= canWithdraw, "Withdraw amount too high");
-
-    _walletTokensWithdrawn["liq"][_msgSender()] += tokenAmount;
-
-    _transfer(address(this), _msgSender(), tokenAmount);  
-  }
-
 
   function buyerWithdraw(uint256 tokenAmount) external {
     
