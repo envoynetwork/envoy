@@ -1,5 +1,5 @@
-const Migrations = artifacts.require("Migrations");
+const EnvoyToken = artifacts.require("EnvoyToken"); 
 
-module.exports = function (deployer) {
-  deployer.deploy(Migrations);
+module.exports = function(deployer) {
+	deployer.deploy(EnvoyToken, "Envoy", "ENV");
 };

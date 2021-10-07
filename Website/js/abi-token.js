@@ -538,6 +538,19 @@ const abiToken = [
         "type": "uint256"
       }
     ],
+    "name": "liqWithdraw",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "tokenAmount",
+        "type": "uint256"
+      }
+    ],
     "name": "teamWithdraw",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -578,19 +591,6 @@ const abiToken = [
       }
     ],
     "name": "dexWithdraw",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "tokenAmount",
-        "type": "uint256"
-      }
-    ],
-    "name": "liqWithdraw",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
