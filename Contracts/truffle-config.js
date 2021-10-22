@@ -35,7 +35,16 @@ module.exports = {
         return new HDWalletProvider(mnemonic, "https://rinkeby.infura.io/v3/" + infuraKey)
       },
       network_id: 4
-    }
+    },
+
+    // BSC test
+    bscTestnet: {
+      provider: () => new HDWalletProvider(mnemonic, `https://data-seed-prebsc-1-s1.binance.org:8545`),
+      network_id: 97,
+      confirmations: 10,
+      timeoutBlocks: 200,
+      skipDryRun: true
+    },
 
     // Mainnet
     // TODO
