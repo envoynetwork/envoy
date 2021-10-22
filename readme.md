@@ -1,4 +1,4 @@
-# $ENVOY Token
+# $ENV Utility Token
 
 ### Utility token to use on envoy.art and related platforms
 
