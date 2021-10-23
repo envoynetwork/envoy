@@ -12,7 +12,7 @@ contract EnvoyToken is ERC20 {
   //
 
   // Deploy time
-  uint256 private _deployTime = 1634032800;
+  uint256 private _deployTime = 1635933600; 
 
   // Contract owner
   address public _ownerWallet;
