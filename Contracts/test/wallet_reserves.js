@@ -42,22 +42,22 @@ contract("Reserve can withdraw 20M over time - 1", function(accounts) {
       "Withdraw amount too high"
     );
 
-    // Advance 1 month
-    await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(43800));
+    // Advance 1 month + 1 min
+    await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(43801));
 
     // Withdraw
-    var result = await EnvoyTokenInstance.reservesWithdraw("800000" + "000000000000000000", {from: reservesAddress});
+    var result = await EnvoyTokenInstance.reservesWithdraw("1000000" + "000000000000000000", {from: reservesAddress});
     assert.equal(result.receipt.status, true, "Transaction should succeed");
 
     // Balance
     var result = await EnvoyTokenInstance.balanceOf(reservesAddress);
-    assert.equal(result, "800000" + "000000000000000000", "Should have 800k tokens");
+    assert.equal(result, "1000000" + "000000000000000000", "Should have 1M tokens");
 
     // Advance 23 months + 1 minute
     await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(1007405));
 
     // Withdraw
-    var result = await EnvoyTokenInstance.reservesWithdraw("19200000" + "000000000000000000", {from: reservesAddress});
+    var result = await EnvoyTokenInstance.reservesWithdraw("19000000" + "000000000000000000", {from: reservesAddress});
     assert.equal(result.receipt.status, true, "Transaction should succeed");
 
     // Balance
@@ -102,9 +102,9 @@ contract("Reserve can withdraw 20M over time - 2", function(accounts) {
 
     const totalTokens = 20000000;
     const cliff = 6;
-    const vesting = 24;
+    const vesting = 20;
 
-    for (let month = 0; month < 30; month++) {
+    for (let month = 0; month < 22; month++) {
 
       if (month <= cliff) {
 

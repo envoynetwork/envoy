@@ -33,8 +33,12 @@ contract("Ecosystem can withdraw 25M over time - 1", function(accounts) {
     var result = await EnvoyTokenInstance.balanceOf(ecosystemAddress);
     assert.equal(result, 0, "Should not have tokens yet");
 
-    // Advance 3 months
-    await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(131400));
+    // Withdraw initial 5%
+    var result = await EnvoyTokenInstance.ecosystemWithdraw("1250000" + "000000000000000000", {from: ecosystemAddress});
+    assert.equal(result.receipt.status, true, "Transaction should succeed");
+
+    // Advance 1 month
+    await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(43800));
 
     // Can not withdraw yet
     await truffleAssert.reverts(
@@ -43,21 +47,21 @@ contract("Ecosystem can withdraw 25M over time - 1", function(accounts) {
     );
 
     // Advance 1 month
-    await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(43800));
+    await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(43801));
 
     // Withdraw
-    var result = await EnvoyTokenInstance.ecosystemWithdraw("1000000" + "000000000000000000", {from: ecosystemAddress});
+    var result = await EnvoyTokenInstance.ecosystemWithdraw("1250000" + "000000000000000000", {from: ecosystemAddress});
     assert.equal(result.receipt.status, true, "Transaction should succeed");
 
     // Balance
     var result = await EnvoyTokenInstance.balanceOf(ecosystemAddress);
-    assert.equal(result, "1000000" + "000000000000000000", "Should have 1M tokens");
+    assert.equal(result, "2500000" + "000000000000000000", "Should have 2.5M tokens");
 
-    // Advance 24 months + 1 minute
-    await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(1051201));
+    // Advance 20 months + 1 minute
+    await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(876002));
 
     // Withdraw
-    var result = await EnvoyTokenInstance.ecosystemWithdraw("24000000" + "000000000000000000", {from: ecosystemAddress});
+    var result = await EnvoyTokenInstance.ecosystemWithdraw("22500000" + "000000000000000000", {from: ecosystemAddress});
     assert.equal(result.receipt.status, true, "Transaction should succeed");
 
     // Balance
@@ -100,13 +104,24 @@ contract("Ecosystem can withdraw 25M over time - 2", function(accounts) {
     const ecosystemAddress = accounts[3];
     const EnvoyTokenInstance = await EnvoyToken.deployed();
 
-    const totalTokens = 25000000;
-    const cliff = 3;
-    const vesting = 24;
+    const initialTokens = 1250000;
+    const totalTokens = 25000000 - initialTokens;
+    const cliff = 1;
+    const vesting = 19;
 
-    for (let month = 0; month < 30; month++) {
+    for (let month = 0; month < 21; month++) {
 
-      if (month <= cliff) {
+      if (month == 0) {
+
+        // Withdraw initial 10%
+        var result = await EnvoyTokenInstance.ecosystemWithdraw(initialTokens + "000000000000000000", {from: ecosystemAddress});
+        assert.equal(result.receipt.status, true, "Transaction should succeed");
+
+        // Balance
+        var result = await EnvoyTokenInstance.balanceOf(ecosystemAddress);
+        assert.equal(result, initialTokens + "000000000000000000", "Should have 1M tokens");
+
+      } else if (month <= cliff) {
 
         // Can not withdraw yet
         await truffleAssert.reverts(
@@ -116,8 +131,8 @@ contract("Ecosystem can withdraw 25M over time - 2", function(accounts) {
 
       } else if (month <= (cliff + vesting)) {
 
-        let withdrawPerMonth = parseInt(totalTokens / vesting) - 2;
-        let withdrawTotal = parseInt(withdrawPerMonth * (month - cliff));
+        let withdrawPerMonth = parseInt((totalTokens - initialTokens) / vesting) - 2;
+        let withdrawTotal = parseInt(withdrawPerMonth * (month - cliff) + initialTokens);
 
         // Withdraw
         var result = await EnvoyTokenInstance.ecosystemWithdraw(withdrawPerMonth + "000000000000000000", {from: ecosystemAddress});

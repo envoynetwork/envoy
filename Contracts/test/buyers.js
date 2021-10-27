@@ -42,8 +42,8 @@ contract("Buyer can withdraw over time - 1", function(accounts) {
       "Withdraw amount too high"
     );
 
-    // Advance 2 month
-    await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(87600));
+    // Advance 4 month
+    await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(175200));
 
     // Can not withdraw more
     await truffleAssert.reverts(
@@ -54,15 +54,21 @@ contract("Buyer can withdraw over time - 1", function(accounts) {
     // Advance 1 month + 1 minute
     await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(43801));
 
-    // Withdraw 150k
-    var result = await EnvoyTokenInstance.buyerWithdraw("150000" + "000000000000000000", {from: buyerAddress});
+    // Withdraw 50k
+    var result = await EnvoyTokenInstance.buyerWithdraw("50000" + "000000000000000000", {from: buyerAddress});
     assert.equal(result.receipt.status, true, "Transaction should succeed");
 
-    // Advance 5 months
-    await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(219000));
+    // Can not withdraw more
+    await truffleAssert.reverts(
+      EnvoyTokenInstance.buyerWithdraw("5" + "000000000000000000", {from: buyerAddress}),
+      "Withdraw amount too high"
+    );
+
+    // Advance 17 months
+    await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(744601));
 
     // Withdraw 750k
-    var result = await EnvoyTokenInstance.buyerWithdraw("750000" + "000000000000000000", {from: buyerAddress});
+    var result = await EnvoyTokenInstance.buyerWithdraw("850000" + "000000000000000000", {from: buyerAddress});
     assert.equal(result.receipt.status, true, "Transaction should succeed");
 
     // Advance 1 month
@@ -99,8 +105,8 @@ contract("Buyers can withdraw over time - 2", function(accounts) {
 
     const totalTokens = 1000000;
     const initialTokens = 100000;
-    const cliff = 2;
-    const vesting = 6;
+    const cliff = 4;
+    const vesting = 18;
 
     for (let month = 0; month < 30; month++) {
 
