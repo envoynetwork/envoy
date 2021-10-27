@@ -160,10 +160,10 @@ contract EnvoyToken is ERC20 {
     require(_msgSender() == _ecosystemWallet, "Unauthorized ecosystem wallet");
 
     // TGE = 5%
-    // Cliff = 0 months
+    // Cliff = 1 months = 43800 minutes
     // Vesting = 19 months = 832201 minutes
     // Total = 25M
-    uint256 canWithdraw = walletCanWithdraw(_msgSender(), "ecosystem", 5, 0, 832201, 25000000000000000000000000);
+    uint256 canWithdraw = walletCanWithdraw(_msgSender(), "ecosystem", 5, 43800, 832201, 25000000000000000000000000);
     
     require(tokenAmount <= canWithdraw, "Withdraw amount too high");
 
