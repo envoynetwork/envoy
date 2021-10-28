@@ -38,6 +38,9 @@ contract EnvoyToken is ERC20 {
   uint256 public _totalBuyerTokens;
 
   // Amount of tokens a wallet has withdrawn already, per type
+  // - Does this need to be string, or is bytes32 good enough?
+  // - Why two mappings and not just mapping(string => uint256) (or mapping(bytes32 => uint256) with previous remark).
+  //   There is always only 1 address for a 
   mapping(string => mapping(address => uint256)) public _walletTokensWithdrawn;
 
 
@@ -60,12 +63,14 @@ contract EnvoyToken is ERC20 {
 
   // Owner can update owner
   function updateOwner(address owner) external {
+    // Should this be in a modifier for readability? Used in most functions
     require(_msgSender() == _ownerWallet, "Only owner can update wallets");
 
     _ownerWallet = owner; 
   }
 
   // Update wallets
+  // Are all the addresses always updated all at once? What if I want to change only 1?
   function updateWallets(address publicSale, address team, address ecosystem, address reserves, address dex, address liq) external {
     require(_msgSender() == _ownerWallet, "Only owner can update wallets");
 
@@ -76,6 +81,7 @@ contract EnvoyToken is ERC20 {
     require(dex != address(0), "Should not set zero address");
     require(liq != address(0), "Should not set zero address");
 
+    // New wallets are incremented, should old ones decrement?
     _walletTokensWithdrawn["publicsale"][publicSale] = _walletTokensWithdrawn["publicsale"][_publicSaleWallet];
     _walletTokensWithdrawn["team"][team] = _walletTokensWithdrawn["team"][_teamWallet];
     _walletTokensWithdrawn["ecosystem"][ecosystem] = _walletTokensWithdrawn["ecosystem"][_ecosystemWallet];
@@ -96,6 +102,7 @@ contract EnvoyToken is ERC20 {
     require(_msgSender() == _ownerWallet, "Only owner can set buyer tokens");
 
     // Update total
+    // _totalBuyerTokens += tokenAmount - _buyerTokens[buyer]; to only write once to global var?
     _totalBuyerTokens -= _buyerTokens[buyer];
     _totalBuyerTokens += tokenAmount;
 
@@ -131,7 +138,7 @@ contract EnvoyToken is ERC20 {
     // TGE = 40%
     // Cliff = 1 months = 43800 minutes
     // Vesting = 6 months 262800 minutes
-    // Total = 20M
+    // Total = 20M -> 7M?
     uint256 canWithdraw = walletCanWithdraw(_msgSender(), "liq", 40, 43800, 262800, 7000000000000000000000000, _deployTime);
     
     require(tokenAmount <= canWithdraw, "Withdraw amount too high");
