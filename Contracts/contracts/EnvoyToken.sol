@@ -27,6 +27,9 @@ contract EnvoyToken is Context, IERC20, IERC20Metadata, Ownable {
   // ******************* VARIABLES *******************
   //
 
+  bool public _emergencySwitch;
+
+
   //
   // ******************* SETUP *******************
   //
@@ -36,10 +39,20 @@ contract EnvoyToken is Context, IERC20, IERC20Metadata, Ownable {
     _symbol = "ENV";
   }
 
+
+  //
+  // ******************* ADMIN *******************
+  //
+
   function mintForUnlocksContract(address unlocksContract) external onlyOwner {
+    require(_totalSupply == 0, "Already minted");
 
     // Mint 100M tokens for unlocks contract
     _mint(unlocksContract, 100000000000000000000000000);
+  }
+
+  function toggleEmergencySwitch() external onlyOwner {
+    _emergencySwitch = !_emergencySwitch;
   }
 
 
@@ -119,6 +132,8 @@ contract EnvoyToken is Context, IERC20, IERC20Metadata, Ownable {
   function _transfer(address from, address to, uint256 amount) internal virtual {
     require(from != address(0), "ERC20: transfer from the zero address");
     require(to != address(0), "ERC20: transfer to the zero address");
+
+    require(_emergencySwitch == false, "Emergency switch is on");
 
     uint256 fromBalance = _balances[from];
     require(fromBalance >= amount, "ERC20: transfer amount exceeds balance");

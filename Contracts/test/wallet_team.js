@@ -8,28 +8,28 @@ contract("Team can withdraw 20M over time - 1", function(accounts) {
 
   before("Set wallets", async function () {
 
-     // Const
-     const ownerAddress = accounts[0];
-     const publicSaleAddress = accounts[1];
-     const teamAddress = accounts[2];
-     const ecosystemAddress = accounts[3];
-     const reservesAddress = accounts[4];
-     const dexAddress = accounts[5];
-     const liquidityAddress = accounts[6];
-  
-     const EnvoyTokenInstance = await EnvoyToken.deployed();
-     const EnvoyUnlocksInstance = await EnvoyUnlocks.deployed();
+    // Const
+    const ownerAddress = accounts[0];
+    const publicSaleAddress = accounts[1];
+    const teamAddress = accounts[2];
+    const ecosystemAddress = accounts[3];
+    const reservesAddress = accounts[4];
+    const dexAddress = accounts[5];
+    const liquidityAddress = accounts[6];
 
-     // Setup
-     await EnvoyTokenInstance.mintForUnlocksContract(EnvoyUnlocksInstance.address);
-     await EnvoyUnlocksInstance.setup(EnvoyTokenInstance.address);
+    const EnvoyTokenInstance = await EnvoyToken.deployed();
+    const EnvoyUnlocksInstance = await EnvoyUnlocks.deployed();
 
-     // Update wallets
-     var result = await EnvoyUnlocksInstance.updateWallets(publicSaleAddress, teamAddress, ecosystemAddress, reservesAddress, dexAddress, liquidityAddress);
-     assert.equal(result.receipt.status, true, "Transaction should succeed");
- });
+    // Setup
+    await EnvoyTokenInstance.mintForUnlocksContract(EnvoyUnlocksInstance.address);
+    await EnvoyUnlocksInstance.setup(EnvoyTokenInstance.address);
+
+    // Update wallets
+    var result = await EnvoyUnlocksInstance.updateWallets(publicSaleAddress, teamAddress, ecosystemAddress, reservesAddress, dexAddress, liquidityAddress);
+    assert.equal(result.receipt.status, true, "Transaction should succeed");
+  });
   
- it("Team should be able to withdraw 20M over time - 1", async () => {
+  it("Team should be able to withdraw 20M over time - 1", async () => {
 
     // Const
     const teamAddress = accounts[2];
@@ -85,25 +85,25 @@ contract("Team can withdraw 20M over time - 2", function(accounts) {
 
   before("Set wallets", async function () {
 
-     // Const
-     const ownerAddress = accounts[0];
-     const publicSaleAddress = accounts[1];
-     const teamAddress = accounts[2];
-     const ecosystemAddress = accounts[3];
-     const reservesAddress = accounts[4];
-     const dexAddress = accounts[5];
-     const liquidityAddress = accounts[6];
-  
-     const EnvoyTokenInstance = await EnvoyToken.deployed();
-     const EnvoyUnlocksInstance = await EnvoyUnlocks.deployed();
+    // Const
+    const ownerAddress = accounts[0];
+    const publicSaleAddress = accounts[1];
+    const teamAddress = accounts[2];
+    const ecosystemAddress = accounts[3];
+    const reservesAddress = accounts[4];
+    const dexAddress = accounts[5];
+    const liquidityAddress = accounts[6];
 
-     // Setup
-     await EnvoyTokenInstance.mintForUnlocksContract(EnvoyUnlocksInstance.address);
-     await EnvoyUnlocksInstance.setup(EnvoyTokenInstance.address);
+    const EnvoyTokenInstance = await EnvoyToken.deployed();
+    const EnvoyUnlocksInstance = await EnvoyUnlocks.deployed();
 
-     // Update wallets
-     var result = await EnvoyUnlocksInstance.updateWallets(publicSaleAddress, teamAddress, ecosystemAddress, reservesAddress, dexAddress, liquidityAddress);
-     assert.equal(result.receipt.status, true, "Transaction should succeed");
+    // Setup
+    await EnvoyTokenInstance.mintForUnlocksContract(EnvoyUnlocksInstance.address);
+    await EnvoyUnlocksInstance.setup(EnvoyTokenInstance.address);
+
+    // Update wallets
+    var result = await EnvoyUnlocksInstance.updateWallets(publicSaleAddress, teamAddress, ecosystemAddress, reservesAddress, dexAddress, liquidityAddress);
+    assert.equal(result.receipt.status, true, "Transaction should succeed");
   });
 
   it("Team should be able to withdraw 20M over time - 2", async () => {
@@ -176,25 +176,25 @@ contract("Only team address can withdraw for team wallet", function(accounts) {
 
   before("Set wallets", async function () {
 
-     // Const
-     const ownerAddress = accounts[0];
-     const publicSaleAddress = accounts[1];
-     const teamAddress = accounts[2];
-     const ecosystemAddress = accounts[3];
-     const reservesAddress = accounts[4];
-     const dexAddress = accounts[5];
-     const liquidityAddress = accounts[6];
-  
-     const EnvoyTokenInstance = await EnvoyToken.deployed();
-     const EnvoyUnlocksInstance = await EnvoyUnlocks.deployed();
+    // Const
+    const ownerAddress = accounts[0];
+    const publicSaleAddress = accounts[1];
+    const teamAddress = accounts[2];
+    const ecosystemAddress = accounts[3];
+    const reservesAddress = accounts[4];
+    const dexAddress = accounts[5];
+    const liquidityAddress = accounts[6];
 
-     // Setup
-     await EnvoyTokenInstance.mintForUnlocksContract(EnvoyUnlocksInstance.address);
-     await EnvoyUnlocksInstance.setup(EnvoyTokenInstance.address);
+    const EnvoyTokenInstance = await EnvoyToken.deployed();
+    const EnvoyUnlocksInstance = await EnvoyUnlocks.deployed();
 
-     // Update wallets
-     var result = await EnvoyUnlocksInstance.updateWallets(publicSaleAddress, teamAddress, ecosystemAddress, reservesAddress, dexAddress, liquidityAddress);
-     assert.equal(result.receipt.status, true, "Transaction should succeed");
+    // Setup
+    await EnvoyTokenInstance.mintForUnlocksContract(EnvoyUnlocksInstance.address);
+    await EnvoyUnlocksInstance.setup(EnvoyTokenInstance.address);
+
+    // Update wallets
+    var result = await EnvoyUnlocksInstance.updateWallets(publicSaleAddress, teamAddress, ecosystemAddress, reservesAddress, dexAddress, liquidityAddress);
+    assert.equal(result.receipt.status, true, "Transaction should succeed");
   });
 
   it("Only team address can withdraw for team wallet", async () => {
@@ -216,25 +216,25 @@ contract("Team can withdraw 20M over time - 1", function(accounts) {
 
   before("Set wallets", async function () {
 
-     // Const
-     const ownerAddress = accounts[0];
-     const publicSaleAddress = accounts[1];
-     const teamAddress = accounts[2];
-     const ecosystemAddress = accounts[3];
-     const reservesAddress = accounts[4];
-     const dexAddress = accounts[5];
-     const liquidityAddress = accounts[6];
-  
-     const EnvoyTokenInstance = await EnvoyToken.deployed();
-     const EnvoyUnlocksInstance = await EnvoyUnlocks.deployed();
+    // Const
+    const ownerAddress = accounts[0];
+    const publicSaleAddress = accounts[1];
+    const teamAddress = accounts[2];
+    const ecosystemAddress = accounts[3];
+    const reservesAddress = accounts[4];
+    const dexAddress = accounts[5];
+    const liquidityAddress = accounts[6];
 
-     // Setup
-     await EnvoyTokenInstance.mintForUnlocksContract(EnvoyUnlocksInstance.address);
-     await EnvoyUnlocksInstance.setup(EnvoyTokenInstance.address);
+    const EnvoyTokenInstance = await EnvoyToken.deployed();
+    const EnvoyUnlocksInstance = await EnvoyUnlocks.deployed();
 
-     // Update wallets
-     var result = await EnvoyUnlocksInstance.updateWallets(publicSaleAddress, teamAddress, ecosystemAddress, reservesAddress, dexAddress, liquidityAddress);
-     assert.equal(result.receipt.status, true, "Transaction should succeed");
+    // Setup
+    await EnvoyTokenInstance.mintForUnlocksContract(EnvoyUnlocksInstance.address);
+    await EnvoyUnlocksInstance.setup(EnvoyTokenInstance.address);
+
+    // Update wallets
+    var result = await EnvoyUnlocksInstance.updateWallets(publicSaleAddress, teamAddress, ecosystemAddress, reservesAddress, dexAddress, liquidityAddress);
+    assert.equal(result.receipt.status, true, "Transaction should succeed");
  });
   
  it("If team address changes, the max remains 20M", async () => {
