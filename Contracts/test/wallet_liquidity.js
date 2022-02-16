@@ -2,6 +2,7 @@ const truffleAssert = require('truffle-assertions');
 const truffleHelpers = require('openzeppelin-test-helpers');
 
 const EnvoyToken = artifacts.require("EnvoyToken");
+const EnvoyUnlocks = artifacts.require("EnvoyUnlocks");
 
 contract("Liquidity wallet can withdraw 7M over time - 1", function(accounts) {
 
@@ -17,9 +18,14 @@ contract("Liquidity wallet can withdraw 7M over time - 1", function(accounts) {
      const liquidityAddress = accounts[6];
   
      const EnvoyTokenInstance = await EnvoyToken.deployed();
+     const EnvoyUnlocksInstance = await EnvoyUnlocks.deployed();
+
+     // Setup
+     await EnvoyTokenInstance.mintForUnlocksContract(EnvoyUnlocksInstance.address);
+     await EnvoyUnlocksInstance.setup(EnvoyTokenInstance.address);
 
      // Update wallets
-     var result = await EnvoyTokenInstance.updateWallets(publicSaleAddress, teamAddress, ecosystemAddress, reservesAddress, dexAddress, liquidityAddress);
+     var result = await EnvoyUnlocksInstance.updateWallets(publicSaleAddress, teamAddress, ecosystemAddress, reservesAddress, dexAddress, liquidityAddress);
      assert.equal(result.receipt.status, true, "Transaction should succeed");
  });
   
@@ -28,13 +34,14 @@ contract("Liquidity wallet can withdraw 7M over time - 1", function(accounts) {
     // Const
     const liquidityAddress = accounts[6];
     const EnvoyTokenInstance = await EnvoyToken.deployed();
+    const EnvoyUnlocksInstance = await EnvoyUnlocks.deployed();
 
     // Balance
     var result = await EnvoyTokenInstance.balanceOf(liquidityAddress);
     assert.equal(result, 0, "Should not have tokens yet");
 
     // Withdraw initial 40%
-    var result = await EnvoyTokenInstance.liqWithdraw("2800000" + "000000000000000000", {from: liquidityAddress});
+    var result = await EnvoyUnlocksInstance.liqWithdraw("2800000" + "000000000000000000", {from: liquidityAddress});
     assert.equal(result.receipt.status, true, "Transaction should succeed");
 
     // Advance 1 month
@@ -42,7 +49,7 @@ contract("Liquidity wallet can withdraw 7M over time - 1", function(accounts) {
 
     // Can not withdraw yet
     await truffleAssert.reverts(
-      EnvoyTokenInstance.liqWithdraw("1", {from: liquidityAddress}),
+      EnvoyUnlocksInstance.liqWithdraw("1", {from: liquidityAddress}),
       "Withdraw amount too high"
     );
 
@@ -50,7 +57,7 @@ contract("Liquidity wallet can withdraw 7M over time - 1", function(accounts) {
     await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(43801));
 
     // Withdraw
-    var result = await EnvoyTokenInstance.liqWithdraw("700000" + "000000000000000000", {from: liquidityAddress});
+    var result = await EnvoyUnlocksInstance.liqWithdraw("700000" + "000000000000000000", {from: liquidityAddress});
     assert.equal(result.receipt.status, true, "Transaction should succeed");
 
     // Balance
@@ -61,7 +68,7 @@ contract("Liquidity wallet can withdraw 7M over time - 1", function(accounts) {
     await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(219001));
 
     // Withdraw
-    var result = await EnvoyTokenInstance.liqWithdraw("3500000" + "000000000000000000", {from: liquidityAddress});
+    var result = await EnvoyUnlocksInstance.liqWithdraw("3500000" + "000000000000000000", {from: liquidityAddress});
     assert.equal(result.receipt.status, true, "Transaction should succeed");
 
     // Balance
@@ -70,7 +77,7 @@ contract("Liquidity wallet can withdraw 7M over time - 1", function(accounts) {
 
     // Can not withdraw more
     await truffleAssert.reverts(
-      EnvoyTokenInstance.liqWithdraw("1", {from: liquidityAddress}),
+      EnvoyUnlocksInstance.liqWithdraw("1", {from: liquidityAddress}),
       "Withdraw amount too high"
     );
 
@@ -92,9 +99,14 @@ contract("Liquidity wallet can withdraw 7M over time - 2", function(accounts) {
      const liquidityAddress = accounts[6];
   
      const EnvoyTokenInstance = await EnvoyToken.deployed();
+     const EnvoyUnlocksInstance = await EnvoyUnlocks.deployed();
+
+     // Setup
+     await EnvoyTokenInstance.mintForUnlocksContract(EnvoyUnlocksInstance.address);
+     await EnvoyUnlocksInstance.setup(EnvoyTokenInstance.address);
 
      // Update wallets
-     var result = await EnvoyTokenInstance.updateWallets(publicSaleAddress, teamAddress, ecosystemAddress, reservesAddress, dexAddress, liquidityAddress);
+     var result = await EnvoyUnlocksInstance.updateWallets(publicSaleAddress, teamAddress, ecosystemAddress, reservesAddress, dexAddress, liquidityAddress);
      assert.equal(result.receipt.status, true, "Transaction should succeed");
   });
 
@@ -103,6 +115,7 @@ contract("Liquidity wallet can withdraw 7M over time - 2", function(accounts) {
     // Const
     const liquidityAddress = accounts[6];
     const EnvoyTokenInstance = await EnvoyToken.deployed();
+    const EnvoyUnlocksInstance = await EnvoyUnlocks.deployed();
 
     const initialTokens = 2800000;
     const totalTokens = 7000000;
@@ -114,7 +127,7 @@ contract("Liquidity wallet can withdraw 7M over time - 2", function(accounts) {
       if (month == 0) {
 
         // Withdraw initial 40%
-        var result = await EnvoyTokenInstance.liqWithdraw(initialTokens + "000000000000000000", {from: liquidityAddress});
+        var result = await EnvoyUnlocksInstance.liqWithdraw(initialTokens + "000000000000000000", {from: liquidityAddress});
         assert.equal(result.receipt.status, true, "Transaction should succeed");
 
         // Balance
@@ -123,7 +136,7 @@ contract("Liquidity wallet can withdraw 7M over time - 2", function(accounts) {
 
         // Can not withdraw more
         await truffleAssert.reverts(
-          EnvoyTokenInstance.liqWithdraw("1", {from: liquidityAddress}),
+          EnvoyUnlocksInstance.liqWithdraw("1", {from: liquidityAddress}),
           "Withdraw amount too high"
         );
 
@@ -131,7 +144,7 @@ contract("Liquidity wallet can withdraw 7M over time - 2", function(accounts) {
 
           // Can not withdraw more
           await truffleAssert.reverts(
-            EnvoyTokenInstance.liqWithdraw("1", {from: liquidityAddress}),
+            EnvoyUnlocksInstance.liqWithdraw("1", {from: liquidityAddress}),
             "Withdraw amount too high"
           );
 
@@ -141,7 +154,7 @@ contract("Liquidity wallet can withdraw 7M over time - 2", function(accounts) {
         let withdrawTotal = parseInt(withdrawPerMonth * (month - cliff) + initialTokens);
 
         // Withdraw
-        var result = await EnvoyTokenInstance.liqWithdraw(withdrawPerMonth + "000000000000000000", {from: liquidityAddress});
+        var result = await EnvoyUnlocksInstance.liqWithdraw(withdrawPerMonth + "000000000000000000", {from: liquidityAddress});
         assert.equal(result.receipt.status, true, "Transaction should succeed");
 
         // Balance
@@ -155,7 +168,7 @@ contract("Liquidity wallet can withdraw 7M over time - 2", function(accounts) {
         var tokensLeft = totalTokens - resultNoDecimals;
 
         // Withdraw
-        var result = await EnvoyTokenInstance.liqWithdraw(tokensLeft + "000000000000000000", {from: liquidityAddress});
+        var result = await EnvoyUnlocksInstance.liqWithdraw(tokensLeft + "000000000000000000", {from: liquidityAddress});
         assert.equal(result.receipt.status, true, "Transaction should succeed");
 
         // Balance
@@ -166,7 +179,7 @@ contract("Liquidity wallet can withdraw 7M over time - 2", function(accounts) {
 
         // Can not withdraw anymore
         await truffleAssert.reverts(
-          EnvoyTokenInstance.liqWithdraw("1", {from: liquidityAddress}),
+          EnvoyUnlocksInstance.liqWithdraw("1", {from: liquidityAddress}),
           "Withdraw amount too high"
         );
       }
@@ -194,9 +207,14 @@ contract("Only liquidity address can withdraw for liquidity wallet", function(ac
      const liquidityAddress = accounts[6];
   
      const EnvoyTokenInstance = await EnvoyToken.deployed();
+     const EnvoyUnlocksInstance = await EnvoyUnlocks.deployed();
+
+     // Setup
+     await EnvoyTokenInstance.mintForUnlocksContract(EnvoyUnlocksInstance.address);
+     await EnvoyUnlocksInstance.setup(EnvoyTokenInstance.address);
 
      // Update wallets
-     var result = await EnvoyTokenInstance.updateWallets(publicSaleAddress, teamAddress, ecosystemAddress, reservesAddress, dexAddress, liquidityAddress);
+     var result = await EnvoyUnlocksInstance.updateWallets(publicSaleAddress, teamAddress, ecosystemAddress, reservesAddress, dexAddress, liquidityAddress);
      assert.equal(result.receipt.status, true, "Transaction should succeed");
   });
 
@@ -204,10 +222,10 @@ contract("Only liquidity address can withdraw for liquidity wallet", function(ac
 
     // Const
     const userAddress = accounts[0];
-    const EnvoyTokenInstance = await EnvoyToken.deployed();
+    const EnvoyUnlocksInstance = await EnvoyUnlocks.deployed();
 
     await truffleAssert.reverts(
-      EnvoyTokenInstance.liqWithdraw("1", {from: userAddress}),
+      EnvoyUnlocksInstance.liqWithdraw("1", {from: userAddress}),
       "Unauthorized liquidity incentives wallet"
     );
 
