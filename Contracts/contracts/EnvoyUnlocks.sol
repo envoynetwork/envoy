@@ -12,13 +12,10 @@ contract EnvoyUnlocks is Ownable {
   // ******************* VARIABLES *******************
   //
 
-  // Contract owner
-  address public _ownerWallet;
-
-
-
   // Deploy time
+  // 
   // TODO - SETUP FOR PRODUCTION
+  // 
   uint256 private _deployTime = block.timestamp; 
   uint256 private _startTime = block.timestamp; 
 
@@ -53,7 +50,7 @@ contract EnvoyUnlocks is Ownable {
   //
 
   constructor () {
-    _ownerWallet = _msgSender();
+    
   }
 
   function setup(address tokenAddress) external onlyOwner {
@@ -64,17 +61,8 @@ contract EnvoyUnlocks is Ownable {
   // ******************* ADMIN *******************
   //
 
-  // Owner can update owner
-  function updateOwner(address owner) external {
-    require(_msgSender() == _ownerWallet, "Only owner can update wallets");
-
-    _ownerWallet = owner; 
-  }
-
   // Update wallets
-  function updateWallets(address publicSale, address team, address ecosystem, address reserves, address dex, address liq) external {
-    require(_msgSender() == _ownerWallet, "Only owner can update wallets");
-
+  function updateWallets(address publicSale, address team, address ecosystem, address reserves, address dex, address liq) external onlyOwner {
     require(publicSale != address(0), "Should not set zero address");
     require(team != address(0), "Should not set zero address");
     require(ecosystem != address(0), "Should not set zero address");
@@ -98,9 +86,7 @@ contract EnvoyUnlocks is Ownable {
   }
 
   // Update buyer tokens
-  function setBuyerTokens(address buyer, uint256 tokenAmount) external {
-    require(_msgSender() == _ownerWallet, "Only owner can set buyer tokens");
-
+  function setBuyerTokens(address buyer, uint256 tokenAmount) external onlyOwner {
     // Update total
     _totalBuyerTokens -= _buyerTokens[buyer];
     _totalBuyerTokens += tokenAmount;

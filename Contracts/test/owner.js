@@ -53,7 +53,7 @@ contract("Owner can set up wallets", function(accounts) {
     // Only owner can update wallets
     await truffleAssert.reverts(
       EnvoyUnlocksInstance.updateWallets(publicSaleAddress, teamAddress, ecosystemAddress, reservesAddress, dexAddress, liquidityAddress, {from: teamAddress}),
-      "Only owner can update wallets"
+      "Ownable: caller is not the owner."
     );
 
   });
@@ -72,7 +72,7 @@ contract("Owner can set up wallets", function(accounts) {
     // Only owner can update buyers
     await truffleAssert.reverts(
       EnvoyUnlocksInstance.setBuyerTokens(buyerAddress, "1000000000000000000", {from: buyerAddress}),
-      "Only owner can set buyer tokens"
+      "Ownable: caller is not the owner."
     );
 
   });
@@ -87,12 +87,12 @@ contract("Owner can set up wallets", function(accounts) {
 
     // Only owner can update owner
     await truffleAssert.reverts(
-      EnvoyUnlocksInstance.updateOwner(userAddress, {from: userAddress}),
-      "Only owner can update wallets"
+      EnvoyUnlocksInstance.transferOwnership(userAddress, {from: userAddress}),
+      "Ownable: caller is not the owner"
     );
 
     // Update wallets
-    var result = await EnvoyUnlocksInstance.updateOwner(ownerAddress);
+    var result = await EnvoyUnlocksInstance.transferOwnership(ownerAddress);
     assert.equal(result.receipt.status, true, "Transaction should succeed");
   });
 
