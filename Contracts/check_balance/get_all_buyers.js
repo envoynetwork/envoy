@@ -112,7 +112,8 @@ async function generateReport(file) {
           balance_for_report[innerKey + outerKey] = {'address': innerKey,
                                                     'type': outerKey,
                                                     'allowed in private sale': balance[outerKey][innerKey]['allowed_transactions'],
-                                                    'total claimed': balance[outerKey][innerKey]['claimed_transactions']}
+                                                    'total claimed': balance[outerKey][innerKey]['claimed_transactions'],
+                                                    'current total token balance': (await contract.methods.balanceOf(innerKey).call()).toString()}
         }
     }
     var json_contract = JSON.stringify(balance_for_report);
