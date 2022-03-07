@@ -45,11 +45,13 @@ async function generateReport(file) {
             'Dex Withdraw',
             'Reserves Withdraw', 
             'Team Withdraw',
-            'Ecosystem Withdraw'].includes(workSheetsFromFile[0]['data'][i][15])){
-          transactions.push(workSheetsFromFile[0]['data'][i][0])
+            'Ecosystem Withdraw'].includes(workSheetsFromFile[0]['data'][i][15])
+            & !workSheetsFromFile[0]['data'][i][14]
+            ){
+              transactions.push(workSheetsFromFile[0]['data'][i][0])
         } 
     }
-
+    
     // Initiate output JSON
     var balance = {}
     balance['buyerWithdraw'] = {}
