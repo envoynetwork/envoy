@@ -1,265 +1,187 @@
 pragma solidity ^0.8.0;
 
-import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import "openzeppelin-solidity/contracts/utils/Context.sol";
 import "openzeppelin-solidity/contracts/utils/math/SafeMath.sol";
+import "openzeppelin-solidity/contracts/access/Ownable.sol";
 
-contract EnvoyToken is ERC20 {
+contract EnvoyToken is Context, IERC20, IERC20Metadata, Ownable {
 
   using SafeMath for uint256;
+
+  //
+  // ******************* ERC20 VARIABLES *******************
+  //
+
+  mapping(address => uint256) private _balances;
+
+  mapping(address => mapping(address => uint256)) private _allowances;
+
+  uint256 private _totalSupply;
+
+  string private _name;
+  string private _symbol;
 
   //
   // ******************* VARIABLES *******************
   //
 
-  // Deploy time
-  uint256 private _deployTime = 1635429600; 
-  uint256 private _startTime = 1635933600; 
-
-  // Contract owner
-  address public _ownerWallet;
-
-  // Public sale - 1M
-  address public _publicSaleWallet;
-  // Team - 20M
-  address public _teamWallet;
-  // Ecosystem - 25M
-  address public _ecosystemWallet;
-  // Reserves - 20M
-  address public _reservesWallet;
-  // DEX - 2M
-  address public _dexWallet;
-  // Liquidity incentives - 7M
-  address public _liqWallet;
-
-  // Amount of tokens per buyer in private sale - 25M
-  mapping(address => uint256) public _buyerTokens;
-
-  // Amount of tokens assigned to buyers
-  uint256 public _totalBuyerTokens;
-
-  // Amount of tokens a wallet has withdrawn already, per type
-  mapping(string => mapping(address => uint256)) public _walletTokensWithdrawn;
+  bool public _emergencySwitch;
 
 
   //
   // ******************* SETUP *******************
   //
 
-  constructor (string memory name, string memory symbol) public ERC20(name, symbol) {
-
-    // Set owner wallet
-    _ownerWallet = _msgSender();
-
-    // Mint 100M tokens for contract
-    _mint(address(this), 100000000000000000000000000);
+  constructor () {
+    _name = "Envoy";
+    _symbol = "ENV";
   }
+
 
   //
-  // ******************* WALLETS SETUP *******************
+  // ******************* ADMIN *******************
   //
 
-  // Owner can update owner
-  function updateOwner(address owner) external {
-    require(_msgSender() == _ownerWallet, "Only owner can update wallets");
+  function mintForUnlocksContract(address unlocksContract) external onlyOwner {
+    require(_totalSupply == 0, "Already minted");
 
-    _ownerWallet = owner; 
+    // Mint 100M tokens for unlocks contract
+    _mint(unlocksContract, 100000000000000000000000000);
   }
 
-  // Update wallets
-  function updateWallets(address publicSale, address team, address ecosystem, address reserves, address dex, address liq) external {
-    require(_msgSender() == _ownerWallet, "Only owner can update wallets");
-
-    require(publicSale != address(0), "Should not set zero address");
-    require(team != address(0), "Should not set zero address");
-    require(ecosystem != address(0), "Should not set zero address");
-    require(reserves != address(0), "Should not set zero address");
-    require(dex != address(0), "Should not set zero address");
-    require(liq != address(0), "Should not set zero address");
-
-    _walletTokensWithdrawn["publicsale"][publicSale] = _walletTokensWithdrawn["publicsale"][_publicSaleWallet];
-    _walletTokensWithdrawn["team"][team] = _walletTokensWithdrawn["team"][_teamWallet];
-    _walletTokensWithdrawn["ecosystem"][ecosystem] = _walletTokensWithdrawn["ecosystem"][_ecosystemWallet];
-    _walletTokensWithdrawn["reserve"][reserves] = _walletTokensWithdrawn["reserve"][_reservesWallet];
-    _walletTokensWithdrawn["dex"][dex] = _walletTokensWithdrawn["dex"][_dexWallet];
-    _walletTokensWithdrawn["liq"][liq] = _walletTokensWithdrawn["liq"][_liqWallet];
-
-    _publicSaleWallet = publicSale; 
-    _teamWallet = team;
-    _ecosystemWallet = ecosystem;
-    _reservesWallet = reserves;
-    _dexWallet = dex;
-    _liqWallet = liq;
+  function toggleEmergencySwitch() external onlyOwner {
+    _emergencySwitch = !_emergencySwitch;
   }
 
-  // Update buyer tokens
-  function setBuyerTokens(address buyer, uint256 tokenAmount) external {
-    require(_msgSender() == _ownerWallet, "Only owner can set buyer tokens");
-
-    // Update total
-    _totalBuyerTokens -= _buyerTokens[buyer];
-    _totalBuyerTokens += tokenAmount;
-
-    // Check if enough tokens left, can max assign 25M
-    require(_totalBuyerTokens <= 25000000000000000000000000, "Max amount reached");
-
-    // Update map
-    _buyerTokens[buyer] = tokenAmount;
-  }
 
   //
-  // ******************* OWNER *******************
+  // ******************* ERC20 READ *******************
   //
 
-  function publicSaleWithdraw(uint256 tokenAmount) external {
-    require(_msgSender() == _publicSaleWallet, "Unauthorized public sale wallet");
-
-    uint256 hasWithdrawn = _walletTokensWithdrawn["publicsale"][_msgSender()];
-
-    // Total = 1M instant
-    uint256 canWithdraw = 1000000000000000000000000 - hasWithdrawn;
-
-    require(tokenAmount <= canWithdraw, "Withdraw amount too high");
-
-    _walletTokensWithdrawn["publicsale"][_msgSender()] += tokenAmount;
-
-    _transfer(address(this), _msgSender(), tokenAmount);    
+  function name() public view virtual override returns (string memory) {
+    return _name;
   }
 
-  function liqWithdraw(uint256 tokenAmount) external {
-    require(_msgSender() == _liqWallet, "Unauthorized liquidity incentives wallet");
-
-    // TGE = 40%
-    // Cliff = 1 months = 43800 minutes
-    // Vesting = 6 months 262800 minutes
-    // Total = 20M
-    uint256 canWithdraw = walletCanWithdraw(_msgSender(), "liq", 40, 43800, 262800, 7000000000000000000000000, _deployTime);
-    
-    require(tokenAmount <= canWithdraw, "Withdraw amount too high");
-
-    _walletTokensWithdrawn["liq"][_msgSender()] += tokenAmount;
-
-    _transfer(address(this), _msgSender(), tokenAmount);  
-  
+  function symbol() public view virtual override returns (string memory) {
+    return _symbol;
   }
 
-  function teamWithdraw(uint256 tokenAmount) external {
-    require(_msgSender() == _teamWallet, "Unauthorized team wallet");
-
-    // Cliff = 6 months = 262800 minutes
-    // Vesting = 20 months 876001 minutes
-    // Total = 20M
-    uint256 canWithdraw = walletCanWithdraw(_msgSender(), "team", 0, 262800, 876001, 20000000000000000000000000, _deployTime);
-    
-    require(tokenAmount <= canWithdraw, "Withdraw amount too high");
-
-    _walletTokensWithdrawn["team"][_msgSender()] += tokenAmount;
-
-    _transfer(address(this), _msgSender(), tokenAmount);  
+  function decimals() public view virtual override returns (uint8) {
+    return 18;
   }
 
-  function ecosystemWithdraw(uint256 tokenAmount) external {
-    require(_msgSender() == _ecosystemWallet, "Unauthorized ecosystem wallet");
-
-    // TGE = 5%
-    // Cliff = 1 months = 43800 minutes
-    // Vesting = 19 months = 832201 minutes
-    // Total = 25M
-    uint256 canWithdraw = walletCanWithdraw(_msgSender(), "ecosystem", 5, 43800, 832201, 25000000000000000000000000, _deployTime);
-    
-    require(tokenAmount <= canWithdraw, "Withdraw amount too high");
-
-    _walletTokensWithdrawn["ecosystem"][_msgSender()] += tokenAmount;
-
-    _transfer(address(this), _msgSender(), tokenAmount);  
+  function totalSupply() public view virtual override returns (uint256) {
+    return _totalSupply;
   }
 
-  function reservesWithdraw(uint256 tokenAmount) external {
-    require(_msgSender() == _reservesWallet, "Unauthorized reserves wallet");
-
-    // Cliff = 6 months = 262800 minutes
-    // Vesting = 20 months = 876001 minutes
-    // Total = 20M
-    uint256 canWithdraw = walletCanWithdraw(_msgSender(), "reserve", 0, 262800, 876001, 20000000000000000000000000, _deployTime);
-    
-    require(tokenAmount <= canWithdraw, "Withdraw amount too high");
-
-    _walletTokensWithdrawn["reserve"][_msgSender()] += tokenAmount;
-
-    _transfer(address(this), _msgSender(), tokenAmount);  
+  function balanceOf(address account) public view virtual override returns (uint256) {
+    return _balances[account];
   }
 
-  function dexWithdraw(uint256 tokenAmount) external {
-    require(_msgSender() == _dexWallet, "Unauthorized dex wallet");
-
-    uint256 hasWithdrawn = _walletTokensWithdrawn["dex"][_msgSender()];
-
-    // Total = 2M instant
-    uint256 canWithdraw = 2000000000000000000000000 - hasWithdrawn;
-
-    require(tokenAmount <= canWithdraw, "Withdraw amount too high");
-
-    _walletTokensWithdrawn["dex"][_msgSender()] += tokenAmount;
-
-    _transfer(address(this), _msgSender(), tokenAmount);    
+  function allowance(address owner, address spender) public view virtual override returns (uint256) {
+    return _allowances[owner][spender];
   }
 
-  function buyerWithdraw(uint256 tokenAmount) external {
-    
-    // TGE = 10%
-    // Cliff = 4 months = 175200 minutes
-    // Vesting = 18 months = 788401 minutes
-    uint256 canWithdraw = walletCanWithdraw(_msgSender(), "privatesale", 10, 175200, 788401, _buyerTokens[_msgSender()], _startTime);
-    
-    require(tokenAmount <= canWithdraw, "Withdraw amount too high");
-
-    _walletTokensWithdrawn["privatesale"][_msgSender()] += tokenAmount;
-
-    _transfer(address(this), _msgSender(), tokenAmount);    
-  }
 
   //
-  // ******************* UNLOCK CALCULATION *******************
+  // ******************* ERC20 WRITE *******************
   //
 
-  function walletCanWithdraw(address wallet, string memory walletType, uint256 initialPercentage, uint256 cliffMinutes, uint256 vestingMinutes, uint256 totalTokens, uint256 startTime) public view returns(uint256) {
-    
-    uint256 minutesDiff = (block.timestamp - startTime).div(60);
+  function approve(address spender, uint256 amount) public virtual override returns (bool) {
+    address owner = _msgSender();
+    _approve(owner, spender, amount);
+    return true;
+  }
 
-    // Tokens already withdrawn
-    uint256 withdrawnTokens = _walletTokensWithdrawn[walletType][wallet];
+  function transfer(address to, uint256 amount) public virtual override returns (bool) {
+    address owner = _msgSender();
+    _transfer(owner, to, amount);
+    return true;
+  }
 
-    // Initial tokens
-    uint256 initialTokens = 0;
-    if (initialPercentage != 0) {
-      initialTokens = totalTokens.mul(initialPercentage).div(100);
+  function transferFrom(address from, address to, uint256 amount) public virtual override returns (bool) {
+    address spender = _msgSender();
+    _spendAllowance(from, spender, amount);
+    _transfer(from, to, amount);
+    return true;
+  }
+
+  function increaseAllowance(address spender, uint256 addedValue) public virtual returns (bool) {
+    address owner = _msgSender();
+    _approve(owner, spender, _allowances[owner][spender] + addedValue);
+    return true;
+  }
+
+  function decreaseAllowance(address spender, uint256 subtractedValue) public virtual returns (bool) {
+    address owner = _msgSender();
+    uint256 currentAllowance = _allowances[owner][spender];
+    require(currentAllowance >= subtractedValue, "ERC20: decreased allowance below zero");
+    unchecked {
+      _approve(owner, spender, currentAllowance - subtractedValue);
     }
+    return true;
+  }
 
-    // Cliff not ended
-    if (minutesDiff < uint256(cliffMinutes)) {
-      return initialTokens - withdrawnTokens;
+
+  //
+  // ******************* ERC20 PRIVATE *******************
+  //
+
+  function _transfer(address from, address to, uint256 amount) internal virtual {
+    require(from != address(0), "ERC20: transfer from the zero address");
+    require(to != address(0), "ERC20: transfer to the zero address");
+
+    require(_emergencySwitch == false, "Emergency switch is on");
+
+    uint256 fromBalance = _balances[from];
+    require(fromBalance >= amount, "ERC20: transfer amount exceeds balance");
+    unchecked {
+        _balances[from] = fromBalance - amount;
     }
+    _balances[to] += amount;
 
-    // Tokens per minute over vesting period
-    uint256 buyerTokensPerMinute = totalTokens.sub(initialTokens).div(vestingMinutes); 
+    emit Transfer(from, to, amount);
+  }
 
-    // Advanced minutes minus cliff
-    uint256 unlockedMinutes = minutesDiff - uint256(cliffMinutes); 
+  function _mint(address account, uint256 amount) internal virtual {
+    require(account != address(0), "ERC20: mint to the zero address");
 
-    // Unlocked minutes * tokens per minutes + initial tokens
-    uint256 unlockedTokens = unlockedMinutes.mul(buyerTokensPerMinute).add(initialTokens); 
-    
-    // No extra tokens unlocked
-    if (unlockedTokens <= withdrawnTokens) {
-      return 0;
+    _totalSupply += amount;
+    _balances[account] += amount;
+    emit Transfer(address(0), account, amount);
+  }
+
+  function _burn(address account, uint256 amount) internal virtual {
+    require(account != address(0), "ERC20: burn from the zero address");
+
+    uint256 accountBalance = _balances[account];
+    require(accountBalance >= amount, "ERC20: burn amount exceeds balance");
+    unchecked {
+        _balances[account] = accountBalance - amount;
     }
+    _totalSupply -= amount;
 
-    // Check if buyer reached max
-    if (unlockedTokens > totalTokens) {
-      return totalTokens - withdrawnTokens;
+    emit Transfer(account, address(0), amount);
+  }
+
+  function _approve(address owner, address spender, uint256 amount) internal virtual {
+    require(owner != address(0), "ERC20: approve from the zero address");
+    require(spender != address(0), "ERC20: approve to the zero address");
+
+    _allowances[owner][spender] = amount;
+    emit Approval(owner, spender, amount);
+  }
+
+  function _spendAllowance(address owner, address spender, uint256 amount) internal virtual {
+    uint256 currentAllowance = allowance(owner, spender);
+    if (currentAllowance != type(uint256).max) {
+      require(currentAllowance >= amount, "ERC20: insufficient allowance");
+      unchecked {
+        _approve(owner, spender, currentAllowance - amount);
+      }
     }
-
-    // Result
-    return unlockedTokens - withdrawnTokens;
   }
 
 }

@@ -2,6 +2,7 @@ const truffleAssert = require('truffle-assertions');
 const truffleHelpers = require('openzeppelin-test-helpers');
 
 const EnvoyToken = artifacts.require("EnvoyToken");
+const EnvoyUnlocks = artifacts.require("EnvoyUnlocks");
 
 contract("Owner can set up wallets", function(accounts) {
 
@@ -18,41 +19,41 @@ contract("Owner can set up wallets", function(accounts) {
 
     const zeroAddress = "0x0000000000000000000000000000000000000000";
 
-    const EnvoyTokenInstance = await EnvoyToken.deployed();
+    const EnvoyUnlocksInstance = await EnvoyUnlocks.deployed();
 
     // Update wallets
-    var result = await EnvoyTokenInstance.updateWallets(publicSaleAddress, teamAddress, ecosystemAddress, reservesAddress, dexAddress, liquidityAddress);
+    var result = await EnvoyUnlocksInstance.updateWallets(publicSaleAddress, teamAddress, ecosystemAddress, reservesAddress, dexAddress, liquidityAddress);
     assert.equal(result.receipt.status, true, "Transaction should succeed");
 
     await truffleAssert.reverts(
-      EnvoyTokenInstance.updateWallets(zeroAddress, teamAddress, ecosystemAddress, reservesAddress, dexAddress, liquidityAddress),
+      EnvoyUnlocksInstance.updateWallets(zeroAddress, teamAddress, ecosystemAddress, reservesAddress, dexAddress, liquidityAddress),
       "Should not set zero address"
     );
     await truffleAssert.reverts(
-      EnvoyTokenInstance.updateWallets(publicSaleAddress, zeroAddress, ecosystemAddress, reservesAddress, dexAddress, liquidityAddress),
+      EnvoyUnlocksInstance.updateWallets(publicSaleAddress, zeroAddress, ecosystemAddress, reservesAddress, dexAddress, liquidityAddress),
       "Should not set zero address"
     );
     await truffleAssert.reverts(
-      EnvoyTokenInstance.updateWallets(publicSaleAddress, teamAddress, zeroAddress, reservesAddress, dexAddress, liquidityAddress),
+      EnvoyUnlocksInstance.updateWallets(publicSaleAddress, teamAddress, zeroAddress, reservesAddress, dexAddress, liquidityAddress),
       "Should not set zero address"
     );
     await truffleAssert.reverts(
-      EnvoyTokenInstance.updateWallets(publicSaleAddress, teamAddress, ecosystemAddress, zeroAddress, dexAddress, liquidityAddress),
+      EnvoyUnlocksInstance.updateWallets(publicSaleAddress, teamAddress, ecosystemAddress, zeroAddress, dexAddress, liquidityAddress),
       "Should not set zero address"
     );
     await truffleAssert.reverts(
-      EnvoyTokenInstance.updateWallets(publicSaleAddress, teamAddress, ecosystemAddress, reservesAddress, zeroAddress, liquidityAddress),
+      EnvoyUnlocksInstance.updateWallets(publicSaleAddress, teamAddress, ecosystemAddress, reservesAddress, zeroAddress, liquidityAddress),
       "Should not set zero address"
     );
     await truffleAssert.reverts(
-      EnvoyTokenInstance.updateWallets(publicSaleAddress, teamAddress, ecosystemAddress, reservesAddress, dexAddress, zeroAddress),
+      EnvoyUnlocksInstance.updateWallets(publicSaleAddress, teamAddress, ecosystemAddress, reservesAddress, dexAddress, zeroAddress),
       "Should not set zero address"
     );
 
     // Only owner can update wallets
     await truffleAssert.reverts(
-      EnvoyTokenInstance.updateWallets(publicSaleAddress, teamAddress, ecosystemAddress, reservesAddress, dexAddress, liquidityAddress, {from: teamAddress}),
-      "Only owner can update wallets"
+      EnvoyUnlocksInstance.updateWallets(publicSaleAddress, teamAddress, ecosystemAddress, reservesAddress, dexAddress, liquidityAddress, {from: teamAddress}),
+      "Ownable: caller is not the owner."
     );
 
   });
@@ -62,16 +63,16 @@ contract("Owner can set up wallets", function(accounts) {
     // Const
     const ownerAddress = accounts[0];
     const buyerAddress = accounts[4];
-    const EnvoyTokenInstance = await EnvoyToken.deployed();
+    const EnvoyUnlocksInstance = await EnvoyUnlocks.deployed();
 
     // Update buyer
-    var result = await EnvoyTokenInstance.setBuyerTokens(buyerAddress, "1000000000000000000");
+    var result = await EnvoyUnlocksInstance.setBuyerTokens(buyerAddress, "1000000000000000000");
     assert.equal(result.receipt.status, true, "Transaction should succeed");
 
     // Only owner can update buyers
     await truffleAssert.reverts(
-      EnvoyTokenInstance.setBuyerTokens(buyerAddress, "1000000000000000000", {from: buyerAddress}),
-      "Only owner can set buyer tokens"
+      EnvoyUnlocksInstance.setBuyerTokens(buyerAddress, "1000000000000000000", {from: buyerAddress}),
+      "Ownable: caller is not the owner."
     );
 
   });
@@ -82,16 +83,16 @@ contract("Owner can set up wallets", function(accounts) {
     const ownerAddress = accounts[0];
     const userAddress = accounts[1];
 
-    const EnvoyTokenInstance = await EnvoyToken.deployed();
+    const EnvoyUnlocksInstance = await EnvoyUnlocks.deployed();
 
     // Only owner can update owner
     await truffleAssert.reverts(
-      EnvoyTokenInstance.updateOwner(userAddress, {from: userAddress}),
-      "Only owner can update wallets"
+      EnvoyUnlocksInstance.transferOwnership(userAddress, {from: userAddress}),
+      "Ownable: caller is not the owner"
     );
 
     // Update wallets
-    var result = await EnvoyTokenInstance.updateOwner(ownerAddress);
+    var result = await EnvoyUnlocksInstance.transferOwnership(ownerAddress);
     assert.equal(result.receipt.status, true, "Transaction should succeed");
   });
 
@@ -106,10 +107,10 @@ contract("Withdraw all tokens", function(accounts) {
     const ownerAddress = accounts[0];
     const userAddress = accounts[1];
  
-    const EnvoyTokenInstance = await EnvoyToken.deployed();
+    const EnvoyUnlocksInstance = await EnvoyUnlocks.deployed();
 
     // Update wallets
-    var result = await EnvoyTokenInstance.updateWallets(userAddress, userAddress, userAddress, userAddress, userAddress, userAddress);
+    var result = await EnvoyUnlocksInstance.updateWallets(userAddress, userAddress, userAddress, userAddress, userAddress, userAddress);
     assert.equal(result.receipt.status, true, "Transaction should succeed");
  });
 
@@ -118,40 +119,45 @@ contract("Withdraw all tokens", function(accounts) {
     // Const
     const userAddress = accounts[1];
     const EnvoyTokenInstance = await EnvoyToken.deployed();
+    const EnvoyUnlocksInstance = await EnvoyUnlocks.deployed();
+
+    // Setup
+    EnvoyTokenInstance.mintForUnlocksContract(EnvoyUnlocksInstance.address);
+    EnvoyUnlocksInstance.setup(EnvoyTokenInstance.address);
 
     // All 25M tokens for buyer
-    var result = await EnvoyTokenInstance.setBuyerTokens(userAddress, "25000000" + "000000000000000000");
+    var result = await EnvoyUnlocksInstance.setBuyerTokens(userAddress, "25000000" + "000000000000000000");
     assert.equal(result.receipt.status, true, "Transaction should succeed");
 
     // All tokens are unlocked
     await truffleHelpers.time.increase(truffleHelpers.time.duration.weeks(150));
 
     // Withdraw 1M for public sale
-    var result = await EnvoyTokenInstance.publicSaleWithdraw("1000000" + "000000000000000000", {from: userAddress});
+    var result = await EnvoyUnlocksInstance.publicSaleWithdraw("1000000" + "000000000000000000", {from: userAddress});
     assert.equal(result.receipt.status, true, "Transaction should succeed");
 
     // Withdraw 20M for team
-    var result = await EnvoyTokenInstance.teamWithdraw("20000000" + "000000000000000000", {from: userAddress});
+    var result = await EnvoyUnlocksInstance.teamWithdraw("20000000" + "000000000000000000", {from: userAddress});
     assert.equal(result.receipt.status, true, "Transaction should succeed");
 
     // Withdraw 25M for ecosystem
-    var result = await EnvoyTokenInstance.ecosystemWithdraw("25000000" + "000000000000000000", {from: userAddress});
+    var result = await EnvoyUnlocksInstance.ecosystemWithdraw("25000000" + "000000000000000000", {from: userAddress});
     assert.equal(result.receipt.status, true, "Transaction should succeed");
 
     // Withdraw 20M for reserve
-    var result = await EnvoyTokenInstance.reservesWithdraw("20000000" + "000000000000000000", {from: userAddress});
+    var result = await EnvoyUnlocksInstance.reservesWithdraw("20000000" + "000000000000000000", {from: userAddress});
     assert.equal(result.receipt.status, true, "Transaction should succeed");
 
     // Withdraw 2M for dex
-    var result = await EnvoyTokenInstance.dexWithdraw("2000000" + "000000000000000000", {from: userAddress});
+    var result = await EnvoyUnlocksInstance.dexWithdraw("2000000" + "000000000000000000", {from: userAddress});
     assert.equal(result.receipt.status, true, "Transaction should succeed");
 
     // Withdraw 7M for liquidity incentives
-    var result = await EnvoyTokenInstance.liqWithdraw("7000000" + "000000000000000000", {from: userAddress});
+    var result = await EnvoyUnlocksInstance.liqWithdraw("7000000" + "000000000000000000", {from: userAddress});
     assert.equal(result.receipt.status, true, "Transaction should succeed");
 
     // Withdraw 25M for private sale buyer
-    var result = await EnvoyTokenInstance.buyerWithdraw("25000000" + "000000000000000000", {from: userAddress});
+    var result = await EnvoyUnlocksInstance.buyerWithdraw("25000000" + "000000000000000000", {from: userAddress});
     assert.equal(result.receipt.status, true, "Transaction should succeed");
 
     // Balance

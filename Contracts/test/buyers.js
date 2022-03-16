@@ -2,7 +2,7 @@ const truffleAssert = require('truffle-assertions');
 const truffleHelpers = require('openzeppelin-test-helpers');
 
 const EnvoyToken = artifacts.require("EnvoyToken");
-
+const EnvoyUnlocks = artifacts.require("EnvoyUnlocks");
 
 contract("Buyer can withdraw over time - 1", function(accounts) {
 
@@ -12,9 +12,14 @@ contract("Buyer can withdraw over time - 1", function(accounts) {
     const ownerAddress = accounts[0];
     const buyerAddress = accounts[1];
     const EnvoyTokenInstance = await EnvoyToken.deployed();
+    const EnvoyUnlocksInstance = await EnvoyUnlocks.deployed();
+
+    // Setup
+    await EnvoyTokenInstance.mintForUnlocksContract(EnvoyUnlocksInstance.address);
+    await EnvoyUnlocksInstance.setup(EnvoyTokenInstance.address);
 
     // Update buyer - 1M
-    var result = await EnvoyTokenInstance.setBuyerTokens(buyerAddress, "1000000000000000000000000");
+    var result = await EnvoyUnlocksInstance.setBuyerTokens(buyerAddress, "1000000000000000000000000");
     assert.equal(result.receipt.status, true, "Transaction should succeed");
  });
   
@@ -23,13 +28,14 @@ contract("Buyer can withdraw over time - 1", function(accounts) {
     // Const
     const buyerAddress = accounts[1];
     const EnvoyTokenInstance = await EnvoyToken.deployed();
+    const EnvoyUnlocksInstance = await EnvoyUnlocks.deployed();
 
     // Balance
     var result = await EnvoyTokenInstance.balanceOf(buyerAddress);
     assert.equal(result, 0, "Should not have tokens yet");
 
     // Withdraw initial 10%
-    var result = await EnvoyTokenInstance.buyerWithdraw("100000" + "000000000000000000", {from: buyerAddress});
+    var result = await EnvoyUnlocksInstance.buyerWithdraw("100000" + "000000000000000000", {from: buyerAddress});
     assert.equal(result.receipt.status, true, "Transaction should succeed");
 
     // Balance
@@ -38,7 +44,7 @@ contract("Buyer can withdraw over time - 1", function(accounts) {
 
     // Can not withdraw more
     await truffleAssert.reverts(
-      EnvoyTokenInstance.buyerWithdraw("1", {from: buyerAddress}),
+      EnvoyUnlocksInstance.buyerWithdraw("1", {from: buyerAddress}),
       "Withdraw amount too high"
     );
 
@@ -47,7 +53,7 @@ contract("Buyer can withdraw over time - 1", function(accounts) {
 
     // Can not withdraw more
     await truffleAssert.reverts(
-      EnvoyTokenInstance.buyerWithdraw("1", {from: buyerAddress}),
+      EnvoyUnlocksInstance.buyerWithdraw("1", {from: buyerAddress}),
       "Withdraw amount too high"
     );
 
@@ -55,12 +61,12 @@ contract("Buyer can withdraw over time - 1", function(accounts) {
     await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(43801));
 
     // Withdraw 50k
-    var result = await EnvoyTokenInstance.buyerWithdraw("50000" + "000000000000000000", {from: buyerAddress});
+    var result = await EnvoyUnlocksInstance.buyerWithdraw("50000" + "000000000000000000", {from: buyerAddress});
     assert.equal(result.receipt.status, true, "Transaction should succeed");
 
     // Can not withdraw more
     await truffleAssert.reverts(
-      EnvoyTokenInstance.buyerWithdraw("5" + "000000000000000000", {from: buyerAddress}),
+      EnvoyUnlocksInstance.buyerWithdraw("5" + "000000000000000000", {from: buyerAddress}),
       "Withdraw amount too high"
     );
 
@@ -68,7 +74,7 @@ contract("Buyer can withdraw over time - 1", function(accounts) {
     await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(744601));
 
     // Withdraw 750k
-    var result = await EnvoyTokenInstance.buyerWithdraw("850000" + "000000000000000000", {from: buyerAddress});
+    var result = await EnvoyUnlocksInstance.buyerWithdraw("850000" + "000000000000000000", {from: buyerAddress});
     assert.equal(result.receipt.status, true, "Transaction should succeed");
 
     // Advance 1 month
@@ -76,7 +82,7 @@ contract("Buyer can withdraw over time - 1", function(accounts) {
 
     // Can not withdraw more
     await truffleAssert.reverts(
-      EnvoyTokenInstance.buyerWithdraw("1", {from: buyerAddress}),
+      EnvoyUnlocksInstance.buyerWithdraw("1", {from: buyerAddress}),
       "Withdraw amount too high"
     );
 
@@ -91,9 +97,14 @@ contract("Buyers can withdraw over time - 2", function(accounts) {
     // Const
     const buyerAddress = accounts[1];
     const EnvoyTokenInstance = await EnvoyToken.deployed();
+    const EnvoyUnlocksInstance = await EnvoyUnlocks.deployed();
+
+    // Setup
+    await EnvoyTokenInstance.mintForUnlocksContract(EnvoyUnlocksInstance.address);
+    await EnvoyUnlocksInstance.setup(EnvoyTokenInstance.address);
 
     // Update buyer - 1M
-    var result = await EnvoyTokenInstance.setBuyerTokens(buyerAddress, "1000000000000000000000000");
+    var result = await EnvoyUnlocksInstance.setBuyerTokens(buyerAddress, "1000000000000000000000000");
     assert.equal(result.receipt.status, true, "Transaction should succeed");
   });
 
@@ -102,6 +113,7 @@ contract("Buyers can withdraw over time - 2", function(accounts) {
     // Const
     const buyerAddress = accounts[1];
     const EnvoyTokenInstance = await EnvoyToken.deployed();
+    const EnvoyUnlocksInstance = await EnvoyUnlocks.deployed();
 
     const totalTokens = 1000000;
     const initialTokens = 100000;
@@ -113,7 +125,7 @@ contract("Buyers can withdraw over time - 2", function(accounts) {
       if (month == 0) {
 
         // Withdraw initial 10%
-        var result = await EnvoyTokenInstance.buyerWithdraw(initialTokens + "000000000000000000", {from: buyerAddress});
+        var result = await EnvoyUnlocksInstance.buyerWithdraw(initialTokens + "000000000000000000", {from: buyerAddress});
         assert.equal(result.receipt.status, true, "Transaction should succeed");
 
         // Balance
@@ -124,7 +136,7 @@ contract("Buyers can withdraw over time - 2", function(accounts) {
 
         // Can not withdraw yet
         await truffleAssert.reverts(
-          EnvoyTokenInstance.buyerWithdraw("1", {from: buyerAddress}),
+          EnvoyUnlocksInstance.buyerWithdraw("1", {from: buyerAddress}),
           "Withdraw amount too high"
         );
 
@@ -134,7 +146,7 @@ contract("Buyers can withdraw over time - 2", function(accounts) {
         let withdrawTotal = parseInt(withdrawPerMonth * (month - cliff) + initialTokens);
 
         // Withdraw
-        var result = await EnvoyTokenInstance.buyerWithdraw(withdrawPerMonth + "000000000000000000", {from: buyerAddress});
+        var result = await EnvoyUnlocksInstance.buyerWithdraw(withdrawPerMonth + "000000000000000000", {from: buyerAddress});
         assert.equal(result.receipt.status, true, "Transaction should succeed");
 
         // Balance
@@ -148,7 +160,7 @@ contract("Buyers can withdraw over time - 2", function(accounts) {
         var tokensLeft = totalTokens - resultNoDecimals;
 
         // Withdraw
-        var result = await EnvoyTokenInstance.buyerWithdraw(tokensLeft + "000000000000000000", {from: buyerAddress});
+        var result = await EnvoyUnlocksInstance.buyerWithdraw(tokensLeft + "000000000000000000", {from: buyerAddress});
         assert.equal(result.receipt.status, true, "Transaction should succeed");
 
         // Balance
@@ -159,7 +171,7 @@ contract("Buyers can withdraw over time - 2", function(accounts) {
 
         // Can not withdraw anymore
         await truffleAssert.reverts(
-          EnvoyTokenInstance.buyerWithdraw("1", {from: buyerAddress}),
+          EnvoyUnlocksInstance.buyerWithdraw("1", {from: buyerAddress}),
           "Withdraw amount too high"
         );
       }
@@ -179,10 +191,10 @@ contract("Only added buyer addresses can withdraw", function(accounts) {
 
     // Const
     const buyerAddress = accounts[1];
-    const EnvoyTokenInstance = await EnvoyToken.deployed();
+    const EnvoyUnlocksInstance = await EnvoyUnlocks.deployed();
 
     await truffleAssert.reverts(
-      EnvoyTokenInstance.buyerWithdraw("1", {from: buyerAddress}),
+      EnvoyUnlocksInstance.buyerWithdraw("1", {from: buyerAddress}),
       "Withdraw amount too high"
     );
 
@@ -198,23 +210,23 @@ contract("Can not assign over 25M tokens", function(accounts) {
     const buyerAddress1 = accounts[1];
     const buyerAddress2 = accounts[2];
     const buyerAddress3 = accounts[3];
-    const EnvoyTokenInstance = await EnvoyToken.deployed();
+    const EnvoyUnlocksInstance = await EnvoyUnlocks.deployed();
 
     // Set to 20M first
-    var result = await EnvoyTokenInstance.setBuyerTokens(buyerAddress1, "20000000" + "000000000000000000");
+    var result = await EnvoyUnlocksInstance.setBuyerTokens(buyerAddress1, "20000000" + "000000000000000000");
     assert.equal(result.receipt.status, true, "Transaction should succeed");
 
     // Overwrite 20M with 5M
-    var result = await EnvoyTokenInstance.setBuyerTokens(buyerAddress1, "5000000" + "000000000000000000");
+    var result = await EnvoyUnlocksInstance.setBuyerTokens(buyerAddress1, "5000000" + "000000000000000000");
     assert.equal(result.receipt.status, true, "Transaction should succeed");
 
     // Set to 20M to second buyer
-    var result = await EnvoyTokenInstance.setBuyerTokens(buyerAddress2, "20000000" + "000000000000000000");
+    var result = await EnvoyUnlocksInstance.setBuyerTokens(buyerAddress2, "20000000" + "000000000000000000");
     assert.equal(result.receipt.status, true, "Transaction should succeed");
 
     // Total is now 25M, so can not assign to 3th buyer
     await truffleAssert.reverts(
-      EnvoyTokenInstance.setBuyerTokens(buyerAddress3, "1"),
+      EnvoyUnlocksInstance.setBuyerTokens(buyerAddress3, "1"),
       "Max amount reached"
     );
   });

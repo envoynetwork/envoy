@@ -2,6 +2,7 @@ const truffleAssert = require('truffle-assertions');
 const truffleHelpers = require('openzeppelin-test-helpers');
 
 const EnvoyToken = artifacts.require("EnvoyToken");
+const EnvoyUnlocks = artifacts.require("EnvoyUnlocks");
 
 contract("Ecosystem can withdraw 25M over time - 1", function(accounts) {
 
@@ -17,9 +18,14 @@ contract("Ecosystem can withdraw 25M over time - 1", function(accounts) {
      const liquidityAddress = accounts[6];
   
      const EnvoyTokenInstance = await EnvoyToken.deployed();
+     const EnvoyUnlocksInstance = await EnvoyUnlocks.deployed();
+
+     // Setup
+     await EnvoyTokenInstance.mintForUnlocksContract(EnvoyUnlocksInstance.address);
+     await EnvoyUnlocksInstance.setup(EnvoyTokenInstance.address);
 
      // Update wallets
-     var result = await EnvoyTokenInstance.updateWallets(publicSaleAddress, teamAddress, ecosystemAddress, reservesAddress, dexAddress, liquidityAddress);
+     var result = await EnvoyUnlocksInstance.updateWallets(publicSaleAddress, teamAddress, ecosystemAddress, reservesAddress, dexAddress, liquidityAddress);
      assert.equal(result.receipt.status, true, "Transaction should succeed");
  });
   
@@ -28,13 +34,14 @@ contract("Ecosystem can withdraw 25M over time - 1", function(accounts) {
     // Const
     const ecosystemAddress = accounts[3];
     const EnvoyTokenInstance = await EnvoyToken.deployed();
+    const EnvoyUnlocksInstance = await EnvoyUnlocks.deployed();
 
     // Balance
     var result = await EnvoyTokenInstance.balanceOf(ecosystemAddress);
     assert.equal(result, 0, "Should not have tokens yet");
 
     // Withdraw initial 5%
-    var result = await EnvoyTokenInstance.ecosystemWithdraw("1250000" + "000000000000000000", {from: ecosystemAddress});
+    var result = await EnvoyUnlocksInstance.ecosystemWithdraw("1250000" + "000000000000000000", {from: ecosystemAddress});
     assert.equal(result.receipt.status, true, "Transaction should succeed");
 
     // Advance 1 month
@@ -42,7 +49,7 @@ contract("Ecosystem can withdraw 25M over time - 1", function(accounts) {
 
     // Can not withdraw yet
     await truffleAssert.reverts(
-      EnvoyTokenInstance.ecosystemWithdraw("1", {from: ecosystemAddress}),
+      EnvoyUnlocksInstance.ecosystemWithdraw("1", {from: ecosystemAddress}),
       "Withdraw amount too high"
     );
 
@@ -50,7 +57,7 @@ contract("Ecosystem can withdraw 25M over time - 1", function(accounts) {
     await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(43801));
 
     // Withdraw
-    var result = await EnvoyTokenInstance.ecosystemWithdraw("1250000" + "000000000000000000", {from: ecosystemAddress});
+    var result = await EnvoyUnlocksInstance.ecosystemWithdraw("1250000" + "000000000000000000", {from: ecosystemAddress});
     assert.equal(result.receipt.status, true, "Transaction should succeed");
 
     // Balance
@@ -61,7 +68,7 @@ contract("Ecosystem can withdraw 25M over time - 1", function(accounts) {
     await truffleHelpers.time.increase(truffleHelpers.time.duration.minutes(876002));
 
     // Withdraw
-    var result = await EnvoyTokenInstance.ecosystemWithdraw("22500000" + "000000000000000000", {from: ecosystemAddress});
+    var result = await EnvoyUnlocksInstance.ecosystemWithdraw("22500000" + "000000000000000000", {from: ecosystemAddress});
     assert.equal(result.receipt.status, true, "Transaction should succeed");
 
     // Balance
@@ -70,7 +77,7 @@ contract("Ecosystem can withdraw 25M over time - 1", function(accounts) {
 
     // Can not withdraw more
     await truffleAssert.reverts(
-      EnvoyTokenInstance.ecosystemWithdraw("1", {from: ecosystemAddress}),
+      EnvoyUnlocksInstance.ecosystemWithdraw("1", {from: ecosystemAddress}),
       "Withdraw amount too high"
     );
 
@@ -92,9 +99,14 @@ contract("Ecosystem can withdraw 25M over time - 2", function(accounts) {
      const liquidityAddress = accounts[6];
   
      const EnvoyTokenInstance = await EnvoyToken.deployed();
+     const EnvoyUnlocksInstance = await EnvoyUnlocks.deployed();
+
+     // Setup
+     await EnvoyTokenInstance.mintForUnlocksContract(EnvoyUnlocksInstance.address);
+     await EnvoyUnlocksInstance.setup(EnvoyTokenInstance.address);
 
      // Update wallets
-     var result = await EnvoyTokenInstance.updateWallets(publicSaleAddress, teamAddress, ecosystemAddress, reservesAddress, dexAddress, liquidityAddress);
+     var result = await EnvoyUnlocksInstance.updateWallets(publicSaleAddress, teamAddress, ecosystemAddress, reservesAddress, dexAddress, liquidityAddress);
      assert.equal(result.receipt.status, true, "Transaction should succeed");
   });
 
@@ -103,6 +115,7 @@ contract("Ecosystem can withdraw 25M over time - 2", function(accounts) {
     // Const
     const ecosystemAddress = accounts[3];
     const EnvoyTokenInstance = await EnvoyToken.deployed();
+    const EnvoyUnlocksInstance = await EnvoyUnlocks.deployed();
 
     const initialTokens = 1250000;
     const totalTokens = 25000000 - initialTokens;
@@ -114,7 +127,7 @@ contract("Ecosystem can withdraw 25M over time - 2", function(accounts) {
       if (month == 0) {
 
         // Withdraw initial 10%
-        var result = await EnvoyTokenInstance.ecosystemWithdraw(initialTokens + "000000000000000000", {from: ecosystemAddress});
+        var result = await EnvoyUnlocksInstance.ecosystemWithdraw(initialTokens + "000000000000000000", {from: ecosystemAddress});
         assert.equal(result.receipt.status, true, "Transaction should succeed");
 
         // Balance
@@ -125,7 +138,7 @@ contract("Ecosystem can withdraw 25M over time - 2", function(accounts) {
 
         // Can not withdraw yet
         await truffleAssert.reverts(
-          EnvoyTokenInstance.ecosystemWithdraw("1", {from: ecosystemAddress}),
+          EnvoyUnlocksInstance.ecosystemWithdraw("1", {from: ecosystemAddress}),
           "Withdraw amount too high"
         );
 
@@ -135,7 +148,7 @@ contract("Ecosystem can withdraw 25M over time - 2", function(accounts) {
         let withdrawTotal = parseInt(withdrawPerMonth * (month - cliff) + initialTokens);
 
         // Withdraw
-        var result = await EnvoyTokenInstance.ecosystemWithdraw(withdrawPerMonth + "000000000000000000", {from: ecosystemAddress});
+        var result = await EnvoyUnlocksInstance.ecosystemWithdraw(withdrawPerMonth + "000000000000000000", {from: ecosystemAddress});
         assert.equal(result.receipt.status, true, "Transaction should succeed");
 
         // Balance
@@ -149,7 +162,7 @@ contract("Ecosystem can withdraw 25M over time - 2", function(accounts) {
         var tokensLeft = totalTokens - resultNoDecimals;
 
         // Withdraw
-        var result = await EnvoyTokenInstance.ecosystemWithdraw(tokensLeft + "000000000000000000", {from: ecosystemAddress});
+        var result = await EnvoyUnlocksInstance.ecosystemWithdraw(tokensLeft + "000000000000000000", {from: ecosystemAddress});
         assert.equal(result.receipt.status, true, "Transaction should succeed");
 
         // Balance
@@ -160,7 +173,7 @@ contract("Ecosystem can withdraw 25M over time - 2", function(accounts) {
 
         // Can not withdraw anymore
         await truffleAssert.reverts(
-          EnvoyTokenInstance.ecosystemWithdraw("1", {from: ecosystemAddress}),
+          EnvoyUnlocksInstance.ecosystemWithdraw("1", {from: ecosystemAddress}),
           "Withdraw amount too high"
         );
       }
@@ -187,10 +200,10 @@ contract("Only ecosystem address can withdraw for ecosystem wallet", function(ac
      const dexAddress = accounts[5];
      const liquidityAddress = accounts[6];
   
-     const EnvoyTokenInstance = await EnvoyToken.deployed();
+     const EnvoyUnlocksInstance = await EnvoyUnlocks.deployed();
 
      // Update wallets
-     var result = await EnvoyTokenInstance.updateWallets(publicSaleAddress, teamAddress, ecosystemAddress, reservesAddress, dexAddress, liquidityAddress);
+     var result = await EnvoyUnlocksInstance.updateWallets(publicSaleAddress, teamAddress, ecosystemAddress, reservesAddress, dexAddress, liquidityAddress);
      assert.equal(result.receipt.status, true, "Transaction should succeed");
   });
 
@@ -198,10 +211,10 @@ contract("Only ecosystem address can withdraw for ecosystem wallet", function(ac
 
     // Const
     const userAddress = accounts[0];
-    const EnvoyTokenInstance = await EnvoyToken.deployed();
+    const EnvoyUnlocksInstance = await EnvoyUnlocks.deployed();
 
     await truffleAssert.reverts(
-      EnvoyTokenInstance.ecosystemWithdraw("1", {from: userAddress}),
+      EnvoyUnlocksInstance.ecosystemWithdraw("1", {from: userAddress}),
       "Unauthorized ecosystem wallet"
     );
 
